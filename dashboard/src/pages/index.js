@@ -1,116 +1,160 @@
-import Head from 'next/head';
-import { Box, Container, Grid } from '@mui/material';
-import { Budget } from '../components/dashboard/budget';
-import { LatestOrders } from '../components/dashboard/latest-orders';
-import { LatestProducts } from '../components/dashboard/latest-products';
-import { Sales } from '../components/dashboard/sales';
-import { TasksProgress } from '../components/dashboard/tasks-progress';
-import { TotalCustomers } from '../components/dashboard/total-customers';
-import { TotalProfit } from '../components/dashboard/total-profit';
-import { TrafficByDevice } from '../components/dashboard/traffic-by-device';
-import { DashboardLayout } from '../components/dashboard-layout';
+import React, { useState } from "react";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import {
+  Backdrop,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Container,
+  IconButton,
+  Typography,
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material";
+import TeamLayout from "../components/dashboard/TeamLayout";
+import { Close } from "@mui/icons-material";
+import DashboardLayout from "src/components/layouts/DashboardLayout";
 
-const Dashboard = () => (
-  <>
-    <Head>
-      <title>
-        Dashboard | Material Kit
-      </title>
-    </Head>
-    <Box
-      component="main"
-      sx={{
-        flexGrow: 1,
-        py: 8
-      }}
-    >
-      <Container maxWidth={false}>
-        <Grid
-          container
-          spacing={3}
-        >
-          <Grid
-            item
-            lg={3}
-            sm={6}
-            xl={3}
-            xs={12}
-          >
-            <Budget />
-          </Grid>
-          <Grid
-            item
-            xl={3}
-            lg={3}
-            sm={6}
-            xs={12}
-          >
-            <TotalCustomers />
-          </Grid>
-          <Grid
-            item
-            xl={3}
-            lg={3}
-            sm={6}
-            xs={12}
-          >
-            <TasksProgress />
-          </Grid>
-          <Grid
-            item
-            xl={3}
-            lg={3}
-            sm={6}
-            xs={12}
-          >
-            <TotalProfit sx={{ height: '100%' }} />
-          </Grid>
-          <Grid
-            item
-            lg={8}
-            md={12}
-            xl={9}
-            xs={12}
-          >
-            <Sales />
-          </Grid>
-          <Grid
-            item
-            lg={4}
-            md={6}
-            xl={3}
-            xs={12}
-          >
-            <TrafficByDevice sx={{ height: '100%' }} />
-          </Grid>
-          <Grid
-            item
-            lg={4}
-            md={6}
-            xl={3}
-            xs={12}
-          >
-            <LatestProducts sx={{ height: '100%' }} />
-          </Grid>
-          <Grid
-            item
-            lg={8}
-            md={12}
-            xl={9}
-            xs={12}
-          >
-            <LatestOrders />
-          </Grid>
-        </Grid>
-      </Container>
-    </Box>
-  </>
-);
+const fakeTeamData = [
+  {
+    "IT Team": [
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+    ],
+  },
+  {
+    "Design Team": [
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+      {
+        name: "Arun",
+        role: "Figma",
+      },
+    ],
+  },
+];
 
-Dashboard.getLayout = (page) => (
-  <DashboardLayout>
-    {page}
-  </DashboardLayout>
-);
+const Dashboard = () => {
+  const [open, setOpen] = useState(true);
+
+  const router = useRouter();
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <Head>
+        <title>Dashboard | Material Kit</title>
+      </Head>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          py: 5,
+          px: 5,
+        }}
+      >
+        <Container maxWidth={false}>
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <FormControl variant="filled" sx={{ minWidth: 250, mr: 3, alignSelf: "flex-end" }}>
+              <InputLabel id="demo-simple-select-filled-label">All Teams</InputLabel>
+              <Select labelId="demo-simple-select-filled-label" id="demo-simple-select-filled">
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value={10}>Ten</MenuItem>
+                <MenuItem value={20}>Twenty</MenuItem>
+                <MenuItem value={30}>Thirty</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Box>
+              {fakeTeamData.map((x) => (
+                <TeamLayout data={x} />
+              ))}
+            </Box>
+          </Box>
+
+          <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={open}>
+            <Card sx={{ width: 550 }}>
+              <CardActions sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <IconButton onClick={handleClose}>
+                  <Close />
+                </IconButton>
+              </CardActions>
+              <CardContent sx={{ py: 1 }}>
+                <Typography textAlign="center" component="h1" variant="h6">
+                  Add users to start monitoring
+                </Typography>
+                <Stack direction="row" justifyContent="space-around" sx={{ mt: 3 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ mt: 2, mb: 2, py: 1, px: 3, fontSize: 16 }}
+                    onClick={handleClose}
+                  >
+                    Add Later
+                  </Button>
+                  <Button
+                    variant="contained"
+                    sx={{ mt: 2, mb: 2, py: 1, px: 3, fontSize: 16 }}
+                    onClick={() => router.push("/dashboard/addUsers")}
+                  >
+                    Add User
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          </Backdrop>
+        </Container>
+      </Box>
+    </>
+  );
+};
+
+Dashboard.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Dashboard;
