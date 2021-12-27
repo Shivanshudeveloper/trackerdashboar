@@ -22,7 +22,7 @@ const TeamLayout = (props) => {
           <Button
             variant="contained"
             sx={{ py: 1 }}
-            onClick={() => router.push("/dashboard/addUsers")}
+            onClick={() => router.push("/dashboard/addusers")}
           >
             Add User
           </Button>

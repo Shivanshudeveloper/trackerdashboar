@@ -127,7 +127,7 @@ export default function SignInSide() {
                   type="submit"
                   variant="contained"
                   sx={{ mt: 2, mb: 2, py: 1.4, px: 4.2, fontSize: 16 }}
-                  onClick={() => router.push("/verifyEmail")}
+                  onClick={() => router.push("/verifyemail")}
                 >
                   Sign Up
                 </Button>

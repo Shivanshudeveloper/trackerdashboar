@@ -13,7 +13,7 @@ const ScheduledReports = () => {
         <Button
           variant="contained"
           sx={{ px: 5, py: 1.5 }}
-          onClick={() => router.push("/reports/createReport")}
+          onClick={() => router.push("/reports/createreport")}
         >
           Create New Report
         </Button>

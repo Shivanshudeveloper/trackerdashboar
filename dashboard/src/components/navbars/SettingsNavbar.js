@@ -1,8 +1,7 @@
-import React from "react";
 import { Stack, Toolbar, Typography } from "@mui/material";
 import Link from "next/link";
 
-const SecondaryNavbar = () => {
+const SettingsNavbar = () => {
   return (
     <Toolbar
       disableGutters
@@ -12,28 +11,30 @@ const SecondaryNavbar = () => {
         px: 2,
         display: "flex",
         justifyContent: "center",
-        backgroundColor: "#d2d2d2",
       }}
     >
       <Stack direction="row" justifyContent="center">
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/">Dashboard</Link>
+          <Link href="/settings/organization">Organization</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/leaderboard/mostactive">Leaderboard</Link>
+          <Link href="/settings/users">Users</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/timesheet/activehours">Timesheet</Link>
+          <Link href="/">Productivity</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/reports/scheduledreports">Reports</Link>
+          <Link href="/">Screenshots</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/settings">Settings</Link>
+          <Link href="/">Integrations</Link>
+        </Typography>
+        <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
+          <Link href="/">Billing</Link>
         </Typography>
       </Stack>
     </Toolbar>
   );
 };
 
-export default SecondaryNavbar;
+export default SettingsNavbar;

@@ -14,7 +14,7 @@ import {
   RadioGroup,
   Stack,
 } from "@mui/material";
-import ReportLayout from "src/components/layouts/ReportLayout";
+import MainLayout from "src/components/layouts/MainLayout";
 
 const CreateReport = () => {
   return (
@@ -177,6 +177,6 @@ const CreateReport = () => {
   );
 };
 
-CreateReport.getLayout = (page) => <ReportLayout>{page}</ReportLayout>;
+CreateReport.getLayout = (page) => <MainLayout>{page}</MainLayout>;
 
 export default CreateReport;

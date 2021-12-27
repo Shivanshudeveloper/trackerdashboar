@@ -15,10 +15,10 @@ const ReportNavbar = () => {
     >
       <Stack direction="row" justifyContent="center">
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/reports/scheduledReports">Scheduled Reports</Link>
+          <Link href="/reports/scheduledreports">Scheduled Reports</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/reports/pastReports">Past Reports</Link>
+          <Link href="/reports/pastreports">Past Reports</Link>
         </Typography>
       </Stack>
     </Toolbar>

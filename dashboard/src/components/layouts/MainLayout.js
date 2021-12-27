@@ -8,7 +8,9 @@ const MainLayout = ({ children }) => {
       <AppBar>
         <MainNavbar />
       </AppBar>
-      <main style={{ paddingTop: 64 }}>{children}</main>
+      <main style={{ paddingTop: 80, display: "flex", justifyContent: "center" }}>
+        <div style={{ width: "80%" }}>{children}</div>
+      </main>
     </Box>
   );
 };

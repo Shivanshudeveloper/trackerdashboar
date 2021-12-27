@@ -9,7 +9,7 @@ const responsive = {
   300: { items: 2 },
   568: { items: 2 },
   900: { items: 3 },
-  1024: { items: 5 },
+  1024: { items: 4 },
 };
 
 const CarouselCard = (props) => {
@@ -18,7 +18,7 @@ const CarouselCard = (props) => {
   return (
     <Card sx={{ mx: 1.25 }} onDragStart={handleDragStart} role="presentation">
       <CardHeader sx={{ p: 2 }} title="App Name" />
-      <CardMedia component="img" height="300" image={src} alt="Paella dish" />
+      <CardMedia component="img" height="250" image={src} alt="Paella dish" />
       <Typography textAlign="right" sx={{ m: 2 }} variant="h6" component="p">
         Duration
       </Typography>
@@ -38,7 +38,7 @@ const items = [
 
 const ActivityCarousel = () => {
   return (
-    <Box sx={{ p: 4, mt: 4 }}>
+    <Box sx={{ mt: 2 }}>
       <AliceCarousel
         infinite
         animationDuration={3000}

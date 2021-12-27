@@ -15,10 +15,10 @@ const LeaderboardNavbar = () => {
     >
       <Stack direction="row" justifyContent="center">
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/leaderboard/mostActive">Most Active</Link>
+          <Link href="/leaderboard/mostactive">Most Active</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/leaderboard/mostProductive">Most Productive</Link>
+          <Link href="/leaderboard/mostproductive">Most Productive</Link>
         </Typography>
       </Stack>
     </Toolbar>

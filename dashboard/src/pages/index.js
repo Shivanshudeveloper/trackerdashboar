@@ -141,7 +141,7 @@ const Dashboard = () => {
                   <Button
                     variant="contained"
                     sx={{ mt: 2, mb: 2, py: 1, px: 3, fontSize: 16 }}
-                    onClick={() => router.push("/dashboard/addUsers")}
+                    onClick={() => router.push("/dashboard/addusers")}
                   >
                     Add User
                   </Button>
