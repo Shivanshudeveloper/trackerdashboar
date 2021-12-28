@@ -29,7 +29,7 @@ const SecondaryNavbar = () => {
           <Link href="/reports/scheduledreports">Reports</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/settings">Settings</Link>
+          <Link href="/settings/organization">Settings</Link>
         </Typography>
       </Stack>
     </Toolbar>
