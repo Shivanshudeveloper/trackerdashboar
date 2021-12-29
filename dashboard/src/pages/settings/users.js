@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import { Box, Button, IconButton, Stack } from "@mui/material";
 import { Search } from "@mui/icons-material";
 
@@ -50,13 +51,23 @@ const fakeTeamData = [
 ];
 
 const Users = () => {
+  const router = useRouter();
+
   return (
     <Box>
       <Stack direction="row" justifyContent="flex-end">
-        <Button variant="contained" sx={{ px: 5, py: 1.2, fontSize: 16, mx: 0.5 }}>
+        <Button
+          variant="contained"
+          sx={{ px: 5, py: 1.2, fontSize: 16, mx: 0.5 }}
+          onClick={() => router.push("/settings/users/addnewteam")}
+        >
           Add Team
         </Button>
-        <Button variant="contained" sx={{ px: 5, py: 1.2, fontSize: 16, mx: 0.5 }}>
+        <Button
+          variant="contained"
+          sx={{ px: 5, py: 1.2, fontSize: 16, mx: 0.5 }}
+          onClick={() => router.push("/settings/users/addnewuser")}
+        >
           Add User
         </Button>
         <IconButton color="primary" sx={{ mx: 0.5 }}>

@@ -1,8 +1,11 @@
 import React from "react";
+import { useRouter } from "next/router";
 import { Avatar, Box, Card, CardContent, Grid, Stack, Typography } from "@mui/material";
 
 const AddUserAndTeamLayout = (props) => {
   const { data } = props;
+
+  const router = useRouter();
 
   const keyList = Object.keys(data);
   const teamName = keyList[0];
@@ -19,7 +22,10 @@ const AddUserAndTeamLayout = (props) => {
       <Grid container sx={{ my: 2 }}>
         {valueList.map((x) => (
           <Grid item sm={4} md={3} lg={2} sx={{ display: "flex", justifyContent: "center" }}>
-            <Card sx={{ width: 250, m: 1, cursor: "pointer" }}>
+            <Card
+              sx={{ width: 250, m: 1, cursor: "pointer" }}
+              onClick={() => router.push("/settings/users/edituser")}
+            >
               <CardContent>
                 <Stack direction="row" alignItems="center">
                   <Avatar src="" sx={{ bgcolor: "orange" }} />
