@@ -11,6 +11,7 @@ const SettingsNavbar = () => {
         px: 2,
         display: "flex",
         justifyContent: "center",
+        backgroundColor: "#F0F0F0",
       }}
     >
       <Stack direction="row" justifyContent="center">

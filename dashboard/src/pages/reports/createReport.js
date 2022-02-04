@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   FormControl,
@@ -10,119 +10,379 @@ import {
   OutlinedInput,
   FormControlLabel,
   Button,
-  Radio,
-  RadioGroup,
   Stack,
+  FormGroup,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
 import MainLayout from "src/components/layouts/MainLayout";
+import { DateRangePicker, DatePicker } from "rsuite";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import { API_SERVICE } from "../../config/uri";
+import SnackMessage from "src/components/SnackMessage";
+
+const shareReportArr = ["One Time", "Daily", "Weekly", "Monthly", "Annually", "Fortnightly"];
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
 
 const CreateReport = () => {
+  const [userData, setUserData] = useState(null);
+  const [teamList, setTeamList] = useState([]);
+  const [userList, setUserList] = useState([]);
+  const [teamsUserList, setTeamsUserList] = useState([]);
+  const [teamNames, setTeamNames] = useState([]);
+  const [userNames, setUserNames] = useState([]);
+  const [reportTitle, setReportTitle] = useState("");
+  const [reportPeriod, setReportPeriod] = useState({
+    startDate: new Date(),
+    endDate: new Date(),
+  });
+  const [shareTime, setShareTime] = useState(new Date());
+  const [shareReport, setShareReport] = useState("");
+  const [shareWith, setShareWith] = useState("");
+  const [category, setCategory] = useState({
+    Productivity: false,
+    Timesheet: false,
+    AppUsage: false,
+    Activities: false,
+    Screenshots: false,
+  });
+  const [loading, setLoading] = useState(false);
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [variant, setVariant] = useState("success");
+  const [message, setMessage] = useState("");
+
+  // fetching login user data
+  useEffect(() => {
+    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    setUserData(data);
+  }, []);
+
+  // fetching ans setting teams
+  useEffect(async () => {
+    if (userData !== null) {
+      try {
+        const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${userData.organization}`);
+        console.log(data);
+        if (userData.role === "Admin") {
+          setTeamList(data);
+          return;
+        }
+
+        setTeamList([{ team_name: userData.team }]);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [userData]);
+
+  // fetching all users list
+  useEffect(async () => {
+    if (userData !== null) {
+      try {
+        const { data } = await axios.get(`${API_SERVICE}/api/teamUsers/${userData.organization}`);
+        setUserList(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [userData]);
+
+  // setting user list for selected teams
+  useEffect(() => {
+    if (teamNames.length !== 0) {
+      const list = userList.filter((x) => teamNames.includes(x.team));
+      setTeamsUserList(list);
+    } else {
+      setTeamsUserList([]);
+      setUserNames([]);
+    }
+  }, [teamNames]);
+
+  // function to close snack
+  const snackClose = () => {
+    setSnackOpen(false);
+  };
+
+  // function to close backdrop
+  const backdropClose = () => {
+    setLoading(false);
+  };
+
+  // selecting teams
+  const selectTeams = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setTeamNames(typeof value === "string" ? value.split(",") : value);
+  };
+
+  // selecting users
+  const selectUsers = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setUserNames(typeof value === "string" ? value.split(",") : value);
+  };
+
+  // setting report date range
+  const setReportRange = (data) => {
+    if (data !== null) {
+      const range = reportPeriod;
+      range.startDate = data[0];
+      range.endDate = data[1];
+      setReportPeriod({ ...range });
+    } else {
+      const range = reportPeriod;
+      range.startDate = new Date();
+      range.endDate = new Date();
+      setReportPeriod({ ...range });
+    }
+  };
+
+  // selecting time
+  const selectTime = (e) => {
+    if (e !== null) {
+      setShareTime(e);
+    } else {
+      setShareTime(new Date());
+    }
+  };
+
+  // setting category
+  const handleChange = (event) => {
+    setCategory({
+      ...category,
+      [event.target.name]: event.target.checked,
+    });
+  };
+
+  const { Productivity, Timesheet, AppUsage, Activities, Screenshots } = category;
+
+  // resseting all state after saving report
+  const setAllStateToStart = () => {
+    setReportTitle("");
+    setCategory({
+      Productivity: false,
+      Timesheet: false,
+      AppUsage: false,
+      Activities: false,
+      Screenshots: false,
+    });
+    setReportPeriod({
+      startDate: new Date(),
+      endDate: new Date(),
+    });
+    setTeamName("");
+    setUserName("");
+    setShareReport("");
+    setShareTime(new Date());
+    setShareWith("");
+  };
+
+  // saving report to database
+  const saveReports = async () => {
+    try {
+      const reportCategoryArr = [];
+      Object.entries(category).filter(([key, value]) => {
+        if (value === true) {
+          reportCategoryArr.push(key);
+        }
+      });
+      const insertData = {
+        reportTitle: reportTitle,
+        reportPeriod: reportPeriod,
+        sharePeriod: shareReport,
+        shareTime: shareTime,
+        shareWith: shareWith,
+        teams: teamNames,
+        users: userNames,
+        createdBy: userData.id,
+        organization: userData.organization,
+        type: "scheduled",
+      };
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const body = {
+        reportCategoryArr,
+        data: insertData,
+      };
+      setLoading(true);
+      const { data } = await axios.post(`${API_SERVICE}/api/report/create`, body, config);
+      setMessage(data.message);
+      setVariant("success");
+      setLoading(false);
+      setSnackOpen(true);
+      setAllStateToStart();
+    } catch (error) {
+      setLoading(false);
+      setMessage(error.message);
+      setVariant("error");
+      setSnackOpen(true);
+    }
+  };
+
   return (
-    <Box>
+    <Box sx={{ my: 4 }}>
       <Typography component="h1" variant="h4" sx={{ fontWeight: 500 }}>
         Create/Edit Report
       </Typography>
       <Grid container sx={{ mt: 3 }}>
         <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500 }}>
-            Select Teams:
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
+            Select Team/s:
           </Typography>
         </Grid>
         <Grid item md={10} sx={{ mt: 2 }}>
-          <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel>All Teams</InputLabel>
-            <Select label="Teams">
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
+          <FormControl sx={{ m: 1, width: 300 }}>
+            <InputLabel id="select_teams">Select Teams</InputLabel>
+            <Select
+              labelId="select_teams"
+              id="teams"
+              multiple
+              value={teamNames}
+              onChange={selectTeams}
+              input={<OutlinedInput label="Select Teams" />}
+              renderValue={(selected) => selected.join(", ")}
+              MenuProps={MenuProps}
+            >
+              {teamList.map((x, i) => (
+                <MenuItem key={i++} value={x.team_name}>
+                  <Checkbox checked={teamNames.indexOf(x.team_name) > -1} />
+                  <ListItemText primary={x.team_name} />
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
 
         <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500 }}>
-            Select Users:
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
+            Select User/s:
           </Typography>
         </Grid>
         <Grid item md={10} sx={{ mt: 2 }}>
-          <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel>All Users</InputLabel>
-            <Select label="Users">
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
+          <FormControl sx={{ m: 1, width: 300 }}>
+            <InputLabel id="select_teams">Select Users</InputLabel>
+            <Select
+              labelId="select_users"
+              id="users"
+              multiple
+              value={userNames}
+              onChange={selectUsers}
+              input={<OutlinedInput label="Select Users" />}
+              renderValue={(selected) => selected.join(", ")}
+              MenuProps={MenuProps}
+            >
+              {teamsUserList.map((x, i) => (
+                <MenuItem key={i++} value={x.fullName}>
+                  <Checkbox checked={userNames.indexOf(x.fullName) > -1} />
+                  <ListItemText primary={x.fullName} />
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
 
         <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500 }}>
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
             Report Title:
           </Typography>
         </Grid>
         <Grid item md={10} sx={{ mt: 3 }}>
-          <OutlinedInput fullWidth placeholder="Title" />
+          <OutlinedInput
+            fullWidth
+            placeholder="Title"
+            value={reportTitle}
+            onChange={(e) => setReportTitle(e.target.value)}
+          />
         </Grid>
 
-        <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 3 }}>
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500 }}>
+        <Grid item md={2} sx={{ display: "flex", alignItems: "center", my: 3 }}>
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
             Report Category:
           </Typography>
         </Grid>
-        <Grid item md={10} sx={{ mt: 3 }}>
+        <Grid item md={10} sx={{ my: 3 }}>
           <FormControl component="fieldset">
-            <RadioGroup sx={{ display: "flex", flexDirection: "row" }}>
-              <FormControlLabel value="female" control={<Radio />} label="Productivity" />
-              <FormControlLabel value="male" control={<Radio />} label="Timesheet" />
-              <FormControlLabel value="other" control={<Radio />} label="App Usage" />
-              <FormControlLabel value="disabled" control={<Radio />} label="Activities" />
-              <FormControlLabel value="disabled" control={<Radio />} label="Screenshots" />
-            </RadioGroup>
+            <FormGroup sx={{ display: "flex", flexDirection: "row" }}>
+              <FormControlLabel
+                control={
+                  <Checkbox checked={Productivity} onChange={handleChange} name="Productivity" />
+                }
+                label="Productivity"
+              />
+              <FormControlLabel
+                control={<Checkbox checked={Timesheet} onChange={handleChange} name="Timesheet" />}
+                label="Timesheet"
+              />
+              <FormControlLabel
+                control={<Checkbox checked={AppUsage} onChange={handleChange} name="AppUsage" />}
+                label="App Usage"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox checked={Activities} onChange={handleChange} name="Activities" />
+                }
+                label="Activities"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox checked={Screenshots} onChange={handleChange} name="Screenshots" />
+                }
+                label="Screenshots"
+              />
+            </FormGroup>
           </FormControl>
         </Grid>
 
-        <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 3 }}>
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500 }}>
+        <Grid item md={2} sx={{ display: "flex", alignItems: "center", my: 3 }}>
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
             Report Period:
           </Typography>
         </Grid>
-        <Grid item md={10} sx={{ mt: 3 }}>
-          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
-            Date Picker with range
-          </Typography>
+        <Grid item md={10} sx={{ my: 3 }}>
+          <DateRangePicker onChange={setReportRange} />
         </Grid>
 
         <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 3 }}>
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500 }}>
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
             Share Report:
           </Typography>
         </Grid>
         <Grid item md={6} sx={{ mt: 3 }}>
           <Grid container>
-            <Grid item md={4}>
-              <Button sx={{ px: 6, py: 1.4 }}>One Time</Button>
-            </Grid>
-            <Grid item md={4}>
-              <Button sx={{ px: 6, py: 1.4 }}>Daily</Button>
-            </Grid>
-            <Grid item md={4}>
-              <Button sx={{ px: 6, py: 1.4 }}>Weekly</Button>
-            </Grid>
-            <Grid item md={4}>
-              <Button sx={{ px: 6, py: 1.4 }}>Monthly</Button>
-            </Grid>
-            <Grid item md={4}>
-              <Button sx={{ px: 6, py: 1.4 }}>Annually</Button>
-            </Grid>
-            <Grid item md={4}>
-              <Button sx={{ px: 6, py: 1.4 }}>Fortnightly</Button>
-            </Grid>
+            {shareReportArr.map((x, i) => (
+              <Grid item md={4} key={i++}>
+                {shareReport === x ? (
+                  <Button
+                    variant="contained"
+                    onClick={() => setShareReport(x)}
+                    sx={{ px: 6, py: 1.4 }}
+                  >
+                    {x}
+                  </Button>
+                ) : (
+                  <Button onClick={() => setShareReport(x)} sx={{ px: 6, py: 1.4 }}>
+                    {x}
+                  </Button>
+                )}
+              </Grid>
+            ))}
           </Grid>
         </Grid>
         <Grid
@@ -130,49 +390,49 @@ const CreateReport = () => {
           md={4}
           sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", mt: 3 }}
         >
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500, mr: 3 }}>
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500, mr: 3 }}>
             at
           </Typography>
-          <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel>12:00 PM</InputLabel>
-            <Select label="Age">
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
+          <div className="field">
+            <DatePicker format="HH:mm" ranges={[]} style={{ width: 260 }} onChange={selectTime} />
+          </div>
         </Grid>
 
         <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 2 }}>
-          <Typography component="h1" variant="h5" sx={{ fontWeight: 500 }}>
+          <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
             Share With:
           </Typography>
         </Grid>
         <Grid item md={10} sx={{ mt: 3 }}>
-          <FormControl fullWidth variant="filled" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel></InputLabel>
-            <Select label="Age">
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
+          <OutlinedInput
+            fullWidth
+            placeholder="Enter Email"
+            value={shareWith}
+            onChange={(e) => setShareWith(e.target.value)}
+          />
         </Grid>
       </Grid>
       <Stack direction="row" justifyContent="flex-end" sx={{ mt: 3 }}>
         <Button variant="contained" sx={{ px: 6, py: 1.3, mr: 3, fontSize: 18 }}>
           Preview
         </Button>
-        <Button variant="contained" sx={{ px: 6, py: 1.5, fontSize: 18 }}>
+        <Button variant="contained" sx={{ px: 6, py: 1.5, fontSize: 18 }} onClick={saveReports}>
           Save
         </Button>
       </Stack>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+        onClick={backdropClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <SnackMessage
+        variant={variant}
+        message={message}
+        snackOpen={snackOpen}
+        handleSnackClose={snackClose}
+      />
     </Box>
   );
 };

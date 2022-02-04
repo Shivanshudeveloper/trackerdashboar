@@ -12,20 +12,53 @@ import {
   Avatar,
 } from "@mui/material";
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
+const Rows = (props) => {
+  const { data } = props;
+  const { activeData } = data;
+  let totalCount = 0;
 
-const rows = [
-  createData("Arun Kartik", 159, 6.0, 24, 4.0),
-  createData("Aditya Kapoor", 237, 9.0, 37, 4.3),
-  createData("Akash Sharma", 262, 16.0, 24, 6.0),
-  createData("Kumari Nidhi", 305, 3.7, 67, 4.3),
-  createData("Kishan Kumar", 356, 16.0, 49, 3.9),
-];
+  activeData.forEach((x) => {
+    totalCount += parseInt(x.count);
+  });
+
+  const tempLength = 4 - activeData.length;
+
+  let tempArr = [1, 2, 3, 4];
+  tempArr = tempArr.slice(0, tempLength);
+
+  return (
+    <TableRow key={data.fullName} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+      <TableCell
+        component="th"
+        scope="row"
+        sx={{ display: "flex", alignItems: "center", fontSize: 18 }}
+      >
+        <Avatar
+          src="https://gravallvar.se/wp-content/uploads/2017/11/person-dummy.jpg"
+          sx={{ mr: 2 }}
+        />
+
+        {data.fullName}
+      </TableCell>
+      {data.activeData.map((x, index) => (
+        <TableCell align="center" key={x.bucket}>
+          {x.sum}
+        </TableCell>
+      ))}
+      {tempArr.map((x) => (
+        <TableCell align="center" key={x}>
+          --
+        </TableCell>
+      ))}
+      <TableCell align="center">{totalCount}</TableCell>
+    </TableRow>
+  );
+};
 
 const ActiveTeamsTable = (props) => {
-  const { teamName } = props;
+  const { data } = props;
+  const teamName = data[0].team;
+
   return (
     <Box sx={{ mt: 5 }}>
       <Typography component="h1" variant="h4" sx={{ mb: 3, fontWeight: 500, fontSize: 24 }}>
@@ -44,25 +77,8 @@ const ActiveTeamsTable = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{ display: "flex", alignItems: "center", fontSize: 18 }}
-                >
-                  <Avatar
-                    src="https://gravallvar.se/wp-content/uploads/2017/11/person-dummy.jpg"
-                    sx={{ mr: 2 }}
-                  />
-                  {row.name}
-                </TableCell>
-                <TableCell align="center">{row.calories}</TableCell>
-                <TableCell align="center">{row.fat}</TableCell>
-                <TableCell align="center">{row.carbs}</TableCell>
-                <TableCell align="center">{row.protein}</TableCell>
-                <TableCell align="center">{row.protein}</TableCell>
-              </TableRow>
+            {data.map((row) => (
+              <Rows data={row} key={row.fullName} />
             ))}
           </TableBody>
         </Table>

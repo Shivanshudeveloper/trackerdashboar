@@ -1,4 +1,5 @@
 import React from "react";
+import { useRouter } from "next/router";
 import {
   Paper,
   TableContainer,
@@ -35,6 +36,8 @@ const rows = [
 ];
 
 const ScheduledReportTable = () => {
+  const router = useRouter();
+
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -61,7 +64,7 @@ const ScheduledReportTable = () => {
               <TableCell align="center">{row.createdBy}</TableCell>
               <TableCell align="center">{row.shared}</TableCell>
               <TableCell align="center">
-                <IconButton color="info">
+                <IconButton onClick={() => router.push("/reports/createreport")} color="info">
                   <Edit />
                 </IconButton>
                 <IconButton color="error">

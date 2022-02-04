@@ -1,4 +1,5 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Head from "next/head";
 import {
   Box,
@@ -11,6 +12,12 @@ import {
   Select,
   MenuItem,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  TextField,
+  DialogActions,
 } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -21,20 +28,159 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import ShareIcon from "@mui/icons-material/Share";
 import DashboardLayout from "src/components/layouts/DashboardLayout";
-
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-  createData("Eclair", 262, 16.0, 24, 6.0),
-  createData("Cupcake", 305, 3.7, 67, 4.3),
-  createData("Gingerbread", 356, 16.0, 49, 3.9),
-];
+import SnackMessage from "src/components/SnackMessage";
+import Backdrop from "@mui/material/Backdrop";
+import CircularProgress from "@mui/material/CircularProgress";
+import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
+import { API_SERVICE } from "../../config/uri";
 
 const AddUsers = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [open, setOpen] = useState(false);
+  const [defaultMode, setDefaultMode] = useState("stealth");
+  const [teamList, setTeamList] = useState([]);
+  const [userData, setUserData] = useState(null);
+  const [userList, setUserList] = useState([]);
+  const [checked, setChecked] = useState([]);
+  const [variant, setVariant] = useState("success");
+  const [message, setMessage] = useState("");
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [backDropOpen, setBackDropOpen] = useState(false);
+
+  const backdropClose = () => {
+    setBackDropOpen(false);
+  };
+
+  const organization = "Infosys";
+  const router = useRouter();
+
+  useEffect(() => {
+    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    setUserData(data);
+  }, []);
+
+  useEffect(async () => {
+    if (userData !== null) {
+      const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${userData.organization}`);
+
+      if (userData.role === "Admin") {
+        setTeamList(data);
+        return;
+      }
+
+      setTeamList([{ team_name: userData.team }]);
+    }
+  }, [userData]);
+
+  const snackClose = () => {
+    setSnackOpen(false);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setName("");
+    setEmail("");
+  };
+
+  const changeDefaultMode = (e) => {
+    if (e.target.checked) {
+      setDefaultMode("visible");
+      for (let i of userList) {
+        i.trackingMode = "visible";
+      }
+    } else {
+      setDefaultMode("stealth");
+      for (let i of userList) {
+        i.trackingMode = "stealth";
+      }
+    }
+  };
+
+  const createUser = () => {
+    const id = uuidv4();
+    const user = {
+      id,
+      name,
+      email,
+      organization,
+      team: "",
+      role: "",
+      trackingMode: defaultMode,
+      isVerified: false,
+    };
+    setUserList([...userList, user]);
+    setOpen(false);
+    setName("");
+    setEmail("");
+  };
+
+  const selectTeam = (e, index) => {
+    const data = userList[index];
+    data.team = e.target.value;
+    userList[index] = data;
+    setUserList([...userList]);
+  };
+
+  const selectRole = (e, index) => {
+    const data = userList[index];
+    data.role = e.target.value;
+    userList[index] = data;
+    setUserList([...userList]);
+  };
+  const selectTrackingMode = (e, index) => {
+    checked[index] = e.target.checked;
+    setChecked([...checked]);
+
+    const data = userList[index];
+    let mode = "stealth";
+
+    if (e.target.checked) {
+      mode = "visible";
+    }
+
+    data.trackingMode = mode;
+    userList[index] = data;
+    setUserList([...userList]);
+  };
+
+  const saveUsers = async () => {
+    if (userList.length === 0) {
+      setMessage("Create atlest one user");
+      setVariant("error");
+      setSnackOpen(true);
+      return;
+    }
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const body = { teamUsers: userList };
+
+      setBackDropOpen(true);
+
+      const { data } = await axios.post(`${API_SERVICE}/api/teamUser/create`, body, config);
+
+      console.log(data);
+      setBackDropOpen(false);
+      setMessage(data.message);
+      setVariant("success");
+      setSnackOpen(true);
+      setUserList([]);
+    } catch (error) {
+      console.log(error);
+      setBackDropOpen(false);
+      setMessage(error);
+      setVariant("error");
+      setSnackOpen(true);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -51,7 +197,7 @@ const AddUsers = () => {
             </Typography>
             <Stack direction="column" alignItems="center" sx={{ ml: 2 }}>
               <FormControlLabel
-                control={<Switch color="primary" />}
+                control={<Switch color="primary" onChange={(e) => changeDefaultMode(e)} />}
                 label={
                   <Stack direction="row">
                     <Typography sx={{ fontSize: 12 }} component="p" variant="p">
@@ -82,48 +228,67 @@ const AddUsers = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
+              {userList.map((row, index) => (
                 <TableRow key={row.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                   <TableCell component="th" scope="row">
                     {row.name}
                   </TableCell>
-                  <TableCell align="center">{row.calories}</TableCell>
+                  <TableCell align="center">{row.id}</TableCell>
                   <TableCell align="center">
                     <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                      <InputLabel id="demo-simple-select-filled-label">Team</InputLabel>
-                      <Select
-                        labelId="demo-simple-select-filled-label"
-                        id="demo-simple-select-filled"
-                      >
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
+                      <InputLabel>Team</InputLabel>
+                      <Select label="Team" value={row.team} onChange={(e) => selectTeam(e, index)}>
+                        {teamList.map((x) => (
+                          <MenuItem value={x.team_name}>{x.team_name}</MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </TableCell>
                   <TableCell align="center">
                     <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                      <InputLabel id="demo-simple-select-filled-label">Role</InputLabel>
-                      <Select
-                        labelId="demo-simple-select-filled-label"
-                        id="demo-simple-select-filled"
-                      >
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
-                      </Select>
+                      <InputLabel>Role</InputLabel>
+                      {userData !== null && (
+                        <>
+                          {userData.role === "Admin" ? (
+                            <Select
+                              value={row.role}
+                              onChange={(e) => selectRole(e, index)}
+                              label="Role"
+                            >
+                              <MenuItem value="Team Admin">Team Admin</MenuItem>
+                              <MenuItem value="Team Member">Team Member</MenuItem>
+                            </Select>
+                          ) : (
+                            <Select
+                              value={row.role}
+                              onChange={(e) => selectRole(e, index)}
+                              label="Role"
+                            >
+                              <MenuItem value="Team Member">Team Member</MenuItem>
+                            </Select>
+                          )}
+                        </>
+                      )}
+                      {/* <Select value={row.role} onChange={(e) => selectRole(e, index)} label="Role">
+                        <MenuItem value="Team Admin">Team Admin</MenuItem>
+                        <MenuItem value="Team Member">Team Member</MenuItem>
+                      </Select> */}
                     </FormControl>
                   </TableCell>
-                  <TableCell align="center">{row.protein}</TableCell>
+                  <TableCell align="center">{row.email}</TableCell>
                   <TableCell align="center">
                     <FormControlLabel
-                      control={<Switch color="primary" />}
+                      control={
+                        row.trackingMode === "visible" ? (
+                          <Switch
+                            checked={true}
+                            onChange={(e) => selectTrackingMode(e, index)}
+                            color="primary"
+                          />
+                        ) : (
+                          <Switch onChange={(e) => selectTrackingMode(e, index)} color="primary" />
+                        )
+                      }
                       label={
                         <Stack direction="row">
                           <Typography sx={{ fontSize: 12 }} component="p" variant="p">
@@ -146,19 +311,67 @@ const AddUsers = () => {
           </Table>
         </TableContainer>
 
-        <Button fullWidth variant="contained" sx={{ py: 1.4 }}>
+        <Button fullWidth variant="contained" sx={{ py: 1.4 }} onClick={() => setOpen(true)}>
           Add New User
         </Button>
 
         <Box sx={{ mt: 2, alignSelf: "flex-end" }}>
-          <Button variant="contained" sx={{ py: 1.4, mr: 2, backgroundColor: "gray" }}>
+          <Button
+            variant="contained"
+            sx={{ py: 1.4, mr: 2, backgroundColor: "gray" }}
+            onClick={() => router.push("/")}
+          >
             Cancel
           </Button>
-          <Button variant="contained" sx={{ py: 1.4 }}>
+          <Button variant="contained" sx={{ py: 1.4 }} onClick={() => saveUsers()}>
             Save User
           </Button>
         </Box>
       </Box>
+
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Add a user</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ mb: 2 }}>All Fields are required</DialogContentText>
+          <TextField
+            required
+            margin="normal"
+            label="Name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <TextField
+            required
+            margin="normal"
+            label="Email"
+            type="email"
+            fullWidth
+            variant="outlined"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={createUser}>Create</Button>
+        </DialogActions>
+      </Dialog>
+      <SnackMessage
+        variant={variant}
+        message={message}
+        snackOpen={snackOpen}
+        handleSnackClose={snackClose}
+      />
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={backDropOpen}
+        onClick={backdropClose}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </>
   );
 };

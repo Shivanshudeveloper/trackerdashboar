@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -11,10 +11,20 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 
 const theme = createTheme();
 
-export default function SignInSide() {
+const VerifyEmail = () => {
   const [otp, setOtp] = useState("");
+  const [email, setEmail] = useState("");
 
   const router = useRouter();
+
+  useEffect(() => {
+    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    setEmail(data.email);
+  }, []);
+
+  const handleSubmit = () => {
+    router.push("/organisationname");
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -67,7 +77,7 @@ export default function SignInSide() {
               variant="h5"
               sx={{ fontWeight: 500, fontSize: 20, textAlign: "center", mt: 10 }}
             >
-              We have sent a one time verification code to your email address ****@gmail.com
+              We have sent a one time verification code to your email address <b>{email}</b>
             </Typography>
             <FormControl fullWidth sx={{ my: 2 }}>
               <FormLabel>Enter OTP*</FormLabel>
@@ -87,7 +97,7 @@ export default function SignInSide() {
                 type="submit"
                 variant="contained"
                 sx={{ mt: 2, mb: 2, py: 1.4, px: 4.2, fontSize: 16 }}
-                onClick={() => router.push("organisationname")}
+                onClick={() => handleSubmit()}
               >
                 OK
               </Button>
@@ -97,4 +107,6 @@ export default function SignInSide() {
       </Grid>
     </ThemeProvider>
   );
-}
+};
+
+export default VerifyEmail;
