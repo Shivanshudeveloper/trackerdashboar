@@ -19,7 +19,6 @@ import MainLayout from "src/components/layouts/MainLayout";
 import { DateRangePicker, DatePicker } from "rsuite";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { API_SERVICE } from "../../config/uri";
 import SnackMessage from "src/components/SnackMessage";
@@ -40,8 +39,8 @@ const CreateReport = () => {
   const [userData, setUserData] = useState(null);
   const [teamList, setTeamList] = useState([]);
   const [userList, setUserList] = useState([]);
-  const [teamsUserList, setTeamsUserList] = useState([]);
-  const [teamNames, setTeamNames] = useState([]);
+  const [teamUsersList, setTeamUsersList] = useState([]);
+  const [teamName, setTeamName] = useState("");
   const [userNames, setUserNames] = useState([]);
   const [reportTitle, setReportTitle] = useState("");
   const [reportPeriod, setReportPeriod] = useState({
@@ -74,7 +73,6 @@ const CreateReport = () => {
     if (userData !== null) {
       try {
         const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${userData.organization}`);
-        console.log(data);
         if (userData.role === "Admin") {
           setTeamList(data);
           return;
@@ -101,14 +99,9 @@ const CreateReport = () => {
 
   // setting user list for selected teams
   useEffect(() => {
-    if (teamNames.length !== 0) {
-      const list = userList.filter((x) => teamNames.includes(x.team));
-      setTeamsUserList(list);
-    } else {
-      setTeamsUserList([]);
-      setUserNames([]);
-    }
-  }, [teamNames]);
+    const list = userList.filter((x) => teamName === x.team);
+    setTeamUsersList(list);
+  }, [teamName]);
 
   // function to close snack
   const snackClose = () => {
@@ -121,11 +114,8 @@ const CreateReport = () => {
   };
 
   // selecting teams
-  const selectTeams = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setTeamNames(typeof value === "string" ? value.split(",") : value);
+  const selectTeam = (event) => {
+    setTeamName(event.target.value);
   };
 
   // selecting users
@@ -133,6 +123,7 @@ const CreateReport = () => {
     const {
       target: { value },
     } = event;
+
     setUserNames(typeof value === "string" ? value.split(",") : value);
   };
 
@@ -172,6 +163,8 @@ const CreateReport = () => {
 
   // resseting all state after saving report
   const setAllStateToStart = () => {
+    setTeamName("");
+    setUserNames([]);
     setReportTitle("");
     setCategory({
       Productivity: false,
@@ -184,8 +177,6 @@ const CreateReport = () => {
       startDate: new Date(),
       endDate: new Date(),
     });
-    setTeamName("");
-    setUserName("");
     setShareReport("");
     setShareTime(new Date());
     setShareWith("");
@@ -206,7 +197,7 @@ const CreateReport = () => {
         sharePeriod: shareReport,
         shareTime: shareTime,
         shareWith: shareWith,
-        teams: teamNames,
+        team: teamName,
         users: userNames,
         createdBy: userData.id,
         organization: userData.organization,
@@ -244,27 +235,15 @@ const CreateReport = () => {
       <Grid container sx={{ mt: 3 }}>
         <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 2 }}>
           <Typography component="h1" variant="h6" sx={{ fontWeight: 500 }}>
-            Select Team/s:
+            Select Team:
           </Typography>
         </Grid>
         <Grid item md={10} sx={{ mt: 2 }}>
-          <FormControl sx={{ m: 1, width: 300 }}>
+          <FormControl sx={{ m: 1, width: 400 }}>
             <InputLabel id="select_teams">Select Teams</InputLabel>
-            <Select
-              labelId="select_teams"
-              id="teams"
-              multiple
-              value={teamNames}
-              onChange={selectTeams}
-              input={<OutlinedInput label="Select Teams" />}
-              renderValue={(selected) => selected.join(", ")}
-              MenuProps={MenuProps}
-            >
-              {teamList.map((x, i) => (
-                <MenuItem key={i++} value={x.team_name}>
-                  <Checkbox checked={teamNames.indexOf(x.team_name) > -1} />
-                  <ListItemText primary={x.team_name} />
-                </MenuItem>
+            <Select value={teamName} onChange={(e) => selectTeam(e)} label="Select Teams">
+              {teamList.map((x) => (
+                <MenuItem value={x.team_name}>{x.team_name}</MenuItem>
               ))}
             </Select>
           </FormControl>
@@ -276,7 +255,7 @@ const CreateReport = () => {
           </Typography>
         </Grid>
         <Grid item md={10} sx={{ mt: 2 }}>
-          <FormControl sx={{ m: 1, width: 300 }}>
+          <FormControl sx={{ m: 1, width: 400 }}>
             <InputLabel id="select_teams">Select Users</InputLabel>
             <Select
               labelId="select_users"
@@ -288,8 +267,8 @@ const CreateReport = () => {
               renderValue={(selected) => selected.join(", ")}
               MenuProps={MenuProps}
             >
-              {teamsUserList.map((x, i) => (
-                <MenuItem key={i++} value={x.fullName}>
+              {teamUsersList.map((x) => (
+                <MenuItem key={x.id} value={x.fullName}>
                   <Checkbox checked={userNames.indexOf(x.fullName) > -1} />
                   <ListItemText primary={x.fullName} />
                 </MenuItem>

@@ -1,5 +1,6 @@
 const db = require('../models/index')
 const asyncHandler = require('express-async-handler')
+const { v4: uuidv4 } = require('uuid')
 
 const addTeamsOfOrganization = asyncHandler(async (req, res, next) => {
   const { teamNames, organization } = req.body
@@ -18,6 +19,7 @@ const addTeamsOfOrganization = asyncHandler(async (req, res, next) => {
       }
 
       await db.teams.create({
+        id: uuidv4(),
         team_name: i,
         organization,
         time,

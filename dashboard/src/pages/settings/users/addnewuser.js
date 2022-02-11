@@ -111,7 +111,7 @@ const AddNewUser = () => {
     const body = { teamUsers: [userData] };
 
     await axios
-      .post(`${API_SERVICE}/api/addTeamUser`, body, config)
+      .post(`${API_SERVICE}/api/teamUser/create`, body, config)
       .then((res) => {
         setOpen(false);
         setMessage(res.data.message);

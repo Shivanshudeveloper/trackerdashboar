@@ -1,40 +1,22 @@
 'use strict'
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('reports', {
+    await queryInterface.createTable('categories', {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.STRING,
       },
-      reportTitle: {
+      organization: {
         type: Sequelize.STRING,
       },
-      reportCategory: {
-        type: Sequelize.STRING,
-      },
-      reportPeriod: {
-        type: Sequelize.JSON,
-      },
-      sharePeriod: {
-        type: Sequelize.STRING,
-      },
-      shareTime: {
-        type: Sequelize.DATE,
-      },
-      shareWith: {
-        type: Sequelize.STRING,
-      },
-      team: {
-        type: Sequelize.STRING,
-      },
-      user: {
-        type: Sequelize.STRING,
-      },
-      createdBy: {
+      categoryName: {
         type: Sequelize.STRING,
       },
       type: {
+        type: Sequelize.STRING,
+      },
+      teamName: {
         type: Sequelize.STRING,
       },
       time: {
@@ -52,6 +34,6 @@ module.exports = {
     })
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('reports')
+    await queryInterface.dropTable('categories')
   },
 }

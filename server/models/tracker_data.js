@@ -14,11 +14,15 @@ module.exports = (sequelize, DataTypes) => {
   tracker_data.init(
     {
       userid: DataTypes.STRING,
+      team: DataTypes.STRING,
+      organization: DataTypes.STRING,
       apptitle: DataTypes.STRING,
       platform: DataTypes.STRING,
       owner: DataTypes.STRING,
-      duration: DataTypes.INTEGER,
+      duration: DataTypes.STRING,
       memory: DataTypes.STRING,
+      category: DataTypes.STRING,
+      type: DataTypes.STRING,
       icon: DataTypes.STRING,
       imgName: DataTypes.ARRAY(DataTypes.STRING),
       time: DataTypes.DATE,

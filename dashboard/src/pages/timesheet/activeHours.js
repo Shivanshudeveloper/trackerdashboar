@@ -42,7 +42,8 @@ const ActiveHours = () => {
       setLoading(false);
       setActiveData(result);
     } catch (error) {
-      console.log(error);
+      setLoading(false);
+      console.log(error.message);
     }
   };
 

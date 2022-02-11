@@ -11,31 +11,10 @@ import {
   IconButton,
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
+import moment from "moment";
 
-function createData(title, details, period, next, createdBy, shared) {
-  return { title, details, period, next, createdBy, shared };
-}
-
-const rows = [
-  createData(
-    "Monthly Productivity Report",
-    "IT Team",
-    "Monthly",
-    "30.12.2021",
-    "Arun Kartik",
-    "All"
-  ),
-  createData(
-    "Daily Activity Report",
-    "Design Team",
-    "Daily",
-    "26.12.2021",
-    "Arun Kartik",
-    "Arun Kartik"
-  ),
-];
-
-const ScheduledReportTable = () => {
+const ScheduledReportTable = (props) => {
+  const { reports, deleteReport } = props;
   const router = useRouter();
 
   return (
@@ -53,21 +32,23 @@ const ScheduledReportTable = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+          {reports.map((row) => (
+            <TableRow key={row.id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
               <TableCell component="th" scope="row">
-                {row.title}
+                {row.reportTitle}
               </TableCell>
-              <TableCell align="center">{row.details}</TableCell>
-              <TableCell align="center">{row.period}</TableCell>
-              <TableCell align="center">{row.next}</TableCell>
+              <TableCell align="center">{row.team}</TableCell>
+              <TableCell align="center">{row.sharePeriod}</TableCell>
+              <TableCell align="center">
+                {moment(row.reportPeriod.endDate).format("DD-MM-YYYY")}
+              </TableCell>
               <TableCell align="center">{row.createdBy}</TableCell>
-              <TableCell align="center">{row.shared}</TableCell>
+              <TableCell align="center">{row.shareWith}</TableCell>
               <TableCell align="center">
                 <IconButton onClick={() => router.push("/reports/createreport")} color="info">
                   <Edit />
                 </IconButton>
-                <IconButton color="error">
+                <IconButton color="error" onClick={() => deleteReport(row.id)}>
                   <Delete />
                 </IconButton>
               </TableCell>

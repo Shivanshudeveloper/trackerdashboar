@@ -31,6 +31,7 @@ const {
 const {
   createReport,
   getReportsOfTypeofOrganization,
+  deleteReport,
 } = require('../controllers/reports')
 
 const {
@@ -39,6 +40,21 @@ const {
   getApplicationType,
   deleteApplicationType,
 } = require('../controllers/timesheets')
+
+const {
+  createOrganization,
+  getOrganizationDetail,
+  updateOrganization,
+} = require('../controllers/organization')
+
+const { getLeaderboard } = require('../controllers/leaderboard')
+
+const {
+  createCategory,
+  getCategories,
+  updateCategoryAndApps,
+  getAllApps,
+} = require('../controllers/appCategory')
 
 // *************** ADMINS *************** //
 
@@ -71,6 +87,7 @@ router.delete('/teamUser/delete/:id', deleteTeamUser)
 
 router.post('/report/create', createReport)
 router.get('/report/:organization/:type', getReportsOfTypeofOrganization)
+router.delete('/report/delete/:id', deleteReport)
 
 // ****************** TIMESHEETS ******************* //
 
@@ -78,5 +95,20 @@ router.post('/applicationType/create', saveApplicationType)
 router.get('/activeHours/:organization/:team', gettingActiveHoursOfTeam)
 router.get('/applicationType/:organization', getApplicationType)
 router.delete('/applicationType/delete/:id', deleteApplicationType)
+
+// ****************** Organization ******************* //
+router.post('/organization/create', createOrganization)
+router.get('/organization/:organization', getOrganizationDetail)
+router.put('/organization/update', updateOrganization)
+
+// ****************** Leaderboard ******************* //
+router.get('/leaderboard/:organization/:team', getLeaderboard)
+
+// ****************** Category & APP ******************* //
+router.post('/category/create', createCategory)
+router.get('/category/:organization', getCategories)
+router.put('/category/update', updateCategoryAndApps)
+
+router.get('/app/:organization', getAllApps)
 
 module.exports = router

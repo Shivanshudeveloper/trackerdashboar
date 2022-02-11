@@ -33,4 +33,12 @@ const getReportsOfTypeofOrganization = asyncHandler(async (req, res, next) => {
     .catch((error) => next(error))
 })
 
-module.exports = { createReport, getReportsOfTypeofOrganization }
+const deleteReport = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  await db.report
+    .destroy({ where: { id } })
+    .then(() => res.status(200).send('Successfully Deleted'))
+    .catch((error) => next(error))
+})
+
+module.exports = { createReport, getReportsOfTypeofOrganization, deleteReport }

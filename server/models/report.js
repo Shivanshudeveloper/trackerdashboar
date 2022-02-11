@@ -20,9 +20,10 @@ module.exports = (sequelize, DataTypes) => {
       shareTime: DataTypes.DATE,
       shareWith: DataTypes.STRING,
       team: DataTypes.STRING,
-      user: DataTypes.STRING,
-      createdBy: DataTypes.STRING,
+      users: DataTypes.ARRAY(DataTypes.STRING),
       type: DataTypes.STRING,
+      organization: DataTypes.STRING,
+      createdBy: DataTypes.STRING,
       time: DataTypes.DATE,
     },
     {
