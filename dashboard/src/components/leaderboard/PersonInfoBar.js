@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, Grid, Stack, Typography } from "@mui/material";
 import { Star } from "@mui/icons-material";
 
 const PersonInfoBar = (props) => {
-  const { bgColor, pos, posFont } = props;
+  const { bgColor, pos, posFont, name, sum, total, type } = props;
+  const [starArr, setStarArr] = useState([]);
+
+  const percent = (sum / total) * 100;
+
+  useEffect(() => {
+    const arr = [];
+    for (let i = pos; i <= 5; i++) {
+      arr.push(i);
+    }
+
+    setStarArr(arr);
+  }, [pos]);
 
   return (
     <Grid
@@ -17,14 +29,12 @@ const PersonInfoBar = (props) => {
       </Grid>
       <Grid sm={6} item sx={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <Typography component="h1" variant="h1">
-          Brent W. Gosett
+          {name}
         </Typography>
         <Stack direction="row">
-          <Star fontSize="large" sx={{ mr: 1.3 }} />
-          <Star fontSize="large" sx={{ mr: 1.3 }} />
-          <Star fontSize="large" sx={{ mr: 1.3 }} />
-          <Star fontSize="large" sx={{ mr: 1.3 }} />
-          <Star fontSize="large" sx={{ mr: 1.3 }} />
+          {starArr.map((x) => (
+            <Star key={x} fontSize="large" sx={{ mr: 1.3 }} />
+          ))}
         </Stack>
       </Grid>
       <Grid
@@ -38,10 +48,10 @@ const PersonInfoBar = (props) => {
         }}
       >
         <Typography component="h1" variant="h1">
-          98%
+          {`${percent.toFixed(1)}%`}
         </Typography>
         <Typography component="h1" variant="h5">
-          Active
+          {type}
         </Typography>
       </Grid>
       <Grid

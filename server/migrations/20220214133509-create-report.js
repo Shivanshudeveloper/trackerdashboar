@@ -7,11 +7,20 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.STRING,
       },
+      team: {
+        type: Sequelize.STRING,
+      },
+      organization: {
+        type: Sequelize.STRING,
+      },
+      users: {
+        type: Sequelize.ARRAY(Sequelize.JSON),
+      },
       reportTitle: {
         type: Sequelize.STRING,
       },
       reportCategory: {
-        type: Sequelize.STRING,
+        type: Sequelize.ARRAY(Sequelize.STRING),
       },
       reportPeriod: {
         type: Sequelize.JSON,
@@ -25,24 +34,15 @@ module.exports = {
       shareWith: {
         type: Sequelize.STRING,
       },
-      team: {
-        type: Sequelize.STRING,
-      },
-      users: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
-      },
       type: {
-        type: Sequelize.STRING,
-      },
-      organization: {
-        type: Sequelize.STRING,
-      },
-      createdBy: {
         type: Sequelize.STRING,
       },
       time: {
         primaryKey: true,
         type: Sequelize.DATE,
+      },
+      createdBy: {
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,

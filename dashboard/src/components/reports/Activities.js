@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 
-import MainLayout from "src/components/layouts/MainLayout";
 import CardComponent from "src/components/user/CardComponent";
 import ActivityCarousel from "src/components/user/ActivityCarousel";
 
@@ -45,7 +44,5 @@ const Activities = () => {
     </Box>
   );
 };
-
-Activities.getLayout = (page) => <MainLayout>{page}</MainLayout>;
 
 export default Activities;

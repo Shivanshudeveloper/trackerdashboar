@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 
-import MainLayout from "src/components/layouts/MainLayout";
 import ScreenshotLayout from "src/components/reports/ScreenshotLayout";
 
 const fakeTeamData = [
@@ -81,7 +80,5 @@ const Screenshots = () => {
     </Box>
   );
 };
-
-Screenshots.getLayout = (page) => <MainLayout>{page}</MainLayout>;
 
 export default Screenshots;

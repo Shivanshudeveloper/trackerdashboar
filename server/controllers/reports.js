@@ -4,18 +4,15 @@ const { v4: uuidv4 } = require('uuid')
 
 const createReport = asyncHandler(async (req, res, next) => {
   try {
-    const { reportCategoryArr, data } = req.body
-
-    for (let i of reportCategoryArr) {
-      const obj = {
-        id: uuidv4(),
-        reportCategory: i,
-        ...data,
-        time: new Date(),
-      }
-
-      await db.report.create(obj)
+    const { data } = req.body
+    const obj = {
+      id: uuidv4(),
+      ...data,
+      time: new Date().getTime(),
     }
+
+    await db.report.create(obj)
+
     res.status(200).send({ message: 'Report saved successfully' })
   } catch (error) {
     next(error)
@@ -33,6 +30,17 @@ const getReportsOfTypeofOrganization = asyncHandler(async (req, res, next) => {
     .catch((error) => next(error))
 })
 
+const getReportById = asyncHandler(async (req, res, next) => {
+  const { id } = req.params
+  await db.report
+    .findByPk(id)
+    .then((report) => {
+      res.statusCode = 200
+      res.json(report)
+    })
+    .catch((error) => next(error))
+})
+
 const deleteReport = asyncHandler(async (req, res, next) => {
   const { id } = req.params
   await db.report
@@ -41,4 +49,9 @@ const deleteReport = asyncHandler(async (req, res, next) => {
     .catch((error) => next(error))
 })
 
-module.exports = { createReport, getReportsOfTypeofOrganization, deleteReport }
+module.exports = {
+  createReport,
+  getReportsOfTypeofOrganization,
+  deleteReport,
+  getReportById,
+}

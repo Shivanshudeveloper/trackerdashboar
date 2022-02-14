@@ -35,33 +35,23 @@ const getCategories = asyncHandler(async (req, res, next) => {
 
 const updateCategoryAndApps = asyncHandler(async (req, res, next) => {
   try {
-    const { categories, apps } = req.body
+    const { categories, apps, team, organization } = req.body
 
     for (let i of categories) {
       const id = i.id
-      const category = await db.category.findByPk(id)
 
-      if (category) {
-        db.category
-          .update({ type: i.type }, { where: { id } })
-          .catch((error) => next(error))
-      } else {
-        throw new Error(`Category ${i.categoryName} not found`)
-      }
+      db.category
+        .update({ type: i.type }, { where: { id } })
+        .catch((error) => next(error))
     }
 
     for (let i of apps) {
-      const id = i.id
-      console.log(id)
-      const app = await db.tracker_data.findByPk(id)
-
-      if (app) {
-        db.tracker_data
-          .update({ type: i.type, category: i.category }, { where: { id } })
-          .catch((error) => next(error))
-      } else {
-        throw new Error(`App ${i.owner} not found`)
-      }
+      db.tracker_data
+        .update(
+          { type: i.type, category: i.category },
+          { where: { owner: i.owner, team, organization } }
+        )
+        .catch((error) => next(error))
     }
 
     res.statusCode = 200

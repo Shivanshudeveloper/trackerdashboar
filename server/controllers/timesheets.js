@@ -47,7 +47,6 @@ const gettingActiveHoursOfTeam = asyncHandler(async (req, res, next) => {
 
       dataArr.push(data)
     }
-
     res.status(200).send(dataArr)
   } catch (error) {
     next(error)

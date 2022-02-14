@@ -32,6 +32,7 @@ const {
   createReport,
   getReportsOfTypeofOrganization,
   deleteReport,
+  getReportById,
 } = require('../controllers/reports')
 
 const {
@@ -47,7 +48,10 @@ const {
   updateOrganization,
 } = require('../controllers/organization')
 
-const { getLeaderboard } = require('../controllers/leaderboard')
+const {
+  getActiveHours,
+  getProductiveHours,
+} = require('../controllers/leaderboard')
 
 const {
   createCategory,
@@ -87,6 +91,7 @@ router.delete('/teamUser/delete/:id', deleteTeamUser)
 
 router.post('/report/create', createReport)
 router.get('/report/:organization/:type', getReportsOfTypeofOrganization)
+router.get('/report/:id', getReportById)
 router.delete('/report/delete/:id', deleteReport)
 
 // ****************** TIMESHEETS ******************* //
@@ -102,7 +107,11 @@ router.get('/organization/:organization', getOrganizationDetail)
 router.put('/organization/update', updateOrganization)
 
 // ****************** Leaderboard ******************* //
-router.get('/leaderboard/:organization/:team', getLeaderboard)
+router.get('/leaderboard/activeHours/:organization/:team', getActiveHours)
+router.get(
+  '/leaderboard/productiveHours/:organization/:team',
+  getProductiveHours
+)
 
 // ****************** Category & APP ******************* //
 router.post('/category/create', createCategory)

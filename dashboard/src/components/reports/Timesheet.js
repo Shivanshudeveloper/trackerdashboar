@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 
-import MainLayout from "src/components/layouts/MainLayout";
 import TimeSheetReportTable from "src/components/reports/TimeSheetReportTable";
 
 const Timesheet = () => {
@@ -22,7 +21,5 @@ const Timesheet = () => {
     </Box>
   );
 };
-
-Timesheet.getLayout = (page) => <MainLayout>{page}</MainLayout>;
 
 export default Timesheet;

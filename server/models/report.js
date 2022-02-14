@@ -13,18 +13,18 @@ module.exports = (sequelize, DataTypes) => {
   }
   report.init(
     {
+      team: DataTypes.STRING,
+      organization: DataTypes.STRING,
+      users: DataTypes.ARRAY(DataTypes.JSON),
       reportTitle: DataTypes.STRING,
-      reportCategory: DataTypes.STRING,
+      reportCategory: DataTypes.ARRAY(DataTypes.STRING),
       reportPeriod: DataTypes.JSON,
       sharePeriod: DataTypes.STRING,
       shareTime: DataTypes.DATE,
       shareWith: DataTypes.STRING,
-      team: DataTypes.STRING,
-      users: DataTypes.ARRAY(DataTypes.STRING),
       type: DataTypes.STRING,
-      organization: DataTypes.STRING,
-      createdBy: DataTypes.STRING,
       time: DataTypes.DATE,
+      createdBy: DataTypes.STRING,
     },
     {
       sequelize,

@@ -45,7 +45,10 @@ const ScheduledReportTable = (props) => {
               <TableCell align="center">{row.createdBy}</TableCell>
               <TableCell align="center">{row.shareWith}</TableCell>
               <TableCell align="center">
-                <IconButton onClick={() => router.push("/reports/createreport")} color="info">
+                <IconButton
+                  onClick={() => router.push(`/reports/editreport/${row.id}`)}
+                  color="info"
+                >
                   <Edit />
                 </IconButton>
                 <IconButton color="error" onClick={() => deleteReport(row.id)}>

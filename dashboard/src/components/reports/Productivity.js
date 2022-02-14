@@ -1,8 +1,6 @@
 import React from "react";
 import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
 
-import MainLayout from "src/components/layouts/MainLayout";
-
 function createData(label, color) {
   return { label, color };
 }
@@ -60,7 +58,5 @@ const Productivity = () => {
     </Box>
   );
 };
-
-Productivity.getLayout = (page) => <MainLayout>{page}</MainLayout>;
 
 export default Productivity;

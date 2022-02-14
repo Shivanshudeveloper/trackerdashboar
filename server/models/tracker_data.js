@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       apptitle: DataTypes.STRING,
       platform: DataTypes.STRING,
       owner: DataTypes.STRING,
-      duration: DataTypes.STRING,
+      duration: DataTypes.INTEGER,
       memory: DataTypes.STRING,
       category: DataTypes.STRING,
       type: DataTypes.STRING,

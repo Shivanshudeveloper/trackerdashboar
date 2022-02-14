@@ -94,7 +94,16 @@ const Productivity = () => {
   useEffect(() => {
     if (selectedTeamName !== "" && allApps.length !== 0) {
       const apps = allApps.filter((x) => x.team === selectedTeamName);
-      setTeamApps(apps);
+      const arr = [];
+      const singleApp = [];
+      apps.forEach((x) => {
+        if (!arr.includes(x.owner)) {
+          arr.push(x.owner);
+          singleApp.push(x);
+        }
+      });
+
+      setTeamApps(singleApp);
     }
   }, [allApps, selectedTeamName]);
 
@@ -176,7 +185,11 @@ const Productivity = () => {
     const body = {
       categories: teamCategories,
       apps: teamApps,
+      team: selectedTeamName,
+      organization: userData.organization,
     };
+
+    console.log(body);
 
     await axios
       .put(`${API_SERVICE}/api/category/update`, body, config)
@@ -208,18 +221,18 @@ const Productivity = () => {
   };
 
   const setAppCategory = (e, index) => {
-    console.log(index);
     const data = teamApps;
     data[index].category = e;
 
     let appType = "";
-    teamCategories.forEach((x) => {
-      if (x.categoryName === e) {
-        appType = x.type;
+    teamCategories.forEach((y) => {
+      if (y.categoryName === e) {
+        appType = y.type;
       }
     });
 
     data[index].type = appType;
+
     setTeamApps([...data]);
   };
 
@@ -252,18 +265,25 @@ const Productivity = () => {
                       backgroundColor: "#DCDCDC",
                       borderRadius: 2,
                       cursor: "pointer",
+                      py: 2.5,
                     }}
                     onClick={() => selectTeam(x.team_name)}
                   >
-                    <ListItemText sx={{ fontSize: 18 }} primary={x.team_name} secondary={"20"} />
+                    <ListItemText sx={{ fontSize: 18 }} primary={x.team_name} />
                   </ListItem>
                 ) : (
                   <ListItem
                     key={x.id}
-                    sx={{ backgroundColor: "#E8E9EB", borderRadius: 2, my: 2, cursor: "pointer" }}
+                    sx={{
+                      backgroundColor: "#E8E9EB",
+                      borderRadius: 2,
+                      my: 2,
+                      cursor: "pointer",
+                      py: 2.5,
+                    }}
                     onClick={() => selectTeam(x.team_name)}
                   >
-                    <ListItemText sx={{ fontSize: 18 }} primary={x.team_name} secondary={"20"} />
+                    <ListItemText sx={{ fontSize: 18 }} primary={x.team_name} />
                   </ListItem>
                 )}
               </>
@@ -328,9 +348,9 @@ const Productivity = () => {
                   sx={{ width: "100%" }}
                 >
                   <Typography noWrap variant="p" component="p">
-                    {x.owner}
+                    {x.owner.split(".")[0]}
                   </Typography>
-                  <FormControl fullWidth variant="outlined" sx={{ width: "50%" }}>
+                  <FormControl fullWidth sx={{ width: "50%" }}>
                     <Select
                       value={x.category === null ? "" : x.category}
                       name="category"

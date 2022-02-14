@@ -21,7 +21,7 @@ import { DateRangePicker, DatePicker } from "rsuite";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
-import { API_SERVICE } from "../../config/uri";
+import { API_SERVICE } from "src/config/uri";
 import SnackMessage from "src/components/SnackMessage";
 
 const shareReportArr = ["One Time", "Daily", "Weekly", "Monthly", "Annually", "Fortnightly"];
@@ -66,6 +66,8 @@ const CreateReport = () => {
   const [message, setMessage] = useState("");
 
   const router = useRouter();
+  const { id } = router.query;
+  console.log(id);
 
   // fetching login user data
   useEffect(() => {
@@ -257,7 +259,7 @@ const CreateReport = () => {
   return (
     <Box sx={{ my: 4 }}>
       <Typography component="h1" variant="h4" sx={{ fontWeight: 500 }}>
-        Create Report
+        Edit Report
       </Typography>
       <Grid container sx={{ mt: 3 }}>
         <Grid item md={2} sx={{ display: "flex", alignItems: "center", mt: 2 }}>
@@ -422,16 +424,11 @@ const CreateReport = () => {
         <Button
           variant="contained"
           sx={{ px: 6, py: 1.3, mr: 3, fontSize: 18 }}
-          onClick={() => router.push("/reports/scheduledreports")}
+          onClick={() => router.push(`/reports/preview/${id}`)}
         >
-          Cancel
+          Preview
         </Button>
-        <Button
-          color="secondary"
-          variant="contained"
-          sx={{ px: 6, py: 1.5, fontSize: 18 }}
-          onClick={saveReports}
-        >
+        <Button variant="contained" sx={{ px: 6, py: 1.5, fontSize: 18 }} onClick={saveReports}>
           Save
         </Button>
       </Stack>
