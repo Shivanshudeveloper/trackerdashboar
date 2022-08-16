@@ -1,15 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import {
-  Backdrop,
   Box,
   Button,
   Card,
-  CardActions,
   CardContent,
   Container,
-  IconButton,
   Typography,
   Stack,
   FormControl,
@@ -19,83 +16,83 @@ import {
 } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 import TeamLayout from "../components/dashboard/TeamLayout";
-import { Close } from "@mui/icons-material";
 import DashboardLayout from "src/components/layouts/DashboardLayout";
-import axios from "axios";
-import { API_SERVICE } from "src/config/uri";
+import { TeamAndUserContext } from "src/contextx/teamAndUserContext";
 
 const Dashboard = () => {
-  const [open, setOpen] = useState(false);
-  const [userData, setUserData] = useState(null);
   const [teamList, setTeamList] = useState([]);
   const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All Teams");
 
+  const { teams, users } = useContext(TeamAndUserContext);
+
   const router = useRouter();
 
-  useEffect(async () => {
-    if (userData !== null) {
-      const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${userData.organization}`);
-      setTeamList(data);
+  useEffect(() => {
+    setTeamList(teams);
+  }, [teams]);
+
+  useEffect(() => {
+    if (users === null) {
+      setLoading(false);
+    } else {
+      setLoading(false);
+      setUserList(users);
     }
-  }, [userData]);
-
-  useEffect(async () => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-
-    if (data !== null && data !== undefined) {
-      try {
-        const users = await axios.get(`${API_SERVICE}/api/teamUsersByGroup/${data.organization}`);
-
-        if (users.data.length === 0) {
-          setLoading(false);
-          setOpen(true);
-        } else {
-          setLoading(false);
-          setUserList(users.data);
-        }
-      } catch (error) {
-        console.log(error.response.data.message);
-      }
-    }
-  }, []);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+  }, [users]);
 
   const applyFilter = async (e) => {
     setFilter(e.target.value);
     setLoading(true);
-    console.log(e.target.value);
+
+    console.log(users);
+
     if (e.target.value === "All Teams") {
-      try {
-        const { data } = await axios.get(
-          `${API_SERVICE}/api/teamUsersByGroup/${userData.organization}`
-        );
-        setUserList(data);
-        setLoading(false);
-      } catch (error) {
-        console.log(error.response.data.message);
-      }
+      setUserList(users);
+      setLoading(false);
       return;
     }
 
-    try {
-      const { data } = await axios.get(
-        `${API_SERVICE}/api/teamUsers/${userData.organization}/${e.target.value}`
-      );
-      setUserList([data]);
-      setLoading(false);
-    } catch (error) {
-      console.log(error.response.data.message);
-    }
+    const arr = users;
+    const res = arr.filter((x) => x[0].team === e.target.value);
+    setUserList(res);
+    setLoading(false);
   };
 
+  if (users === null) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "300px",
+        }}
+      >
+        <Card sx={{ width: 550 }}>
+          <CardContent sx={{ py: 1 }}>
+            <Typography textAlign="center" component="h1" variant="h6">
+              Add users to start monitoring
+            </Typography>
+            <Stack direction="row" justifyContent="space-around" sx={{ mt: 3 }}>
+              <Button
+                variant="contained"
+                sx={{ mt: 2, mb: 2, py: 1, px: 3, fontSize: 16 }}
+                onClick={() => router.push("/dashboard/addusers")}
+              >
+                Add User
+              </Button>
+            </Stack>
+          </CardContent>
+        </Card>
+      </Box>
+    );
+  }
+
   return (
-    <>
+    <React.Fragment>
       <Head>
         <title>Dashboard</title>
       </Head>
@@ -114,7 +111,9 @@ const Dashboard = () => {
               <Select value={filter} onChange={(e) => applyFilter(e)} label="Filter">
                 <MenuItem value="All Teams">All Teams</MenuItem>
                 {teamList.map((x) => (
-                  <MenuItem value={x.team_name}>{x.team_name}</MenuItem>
+                  <MenuItem key={x.id} value={x.team_name}>
+                    {x.team_name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -133,46 +132,15 @@ const Dashboard = () => {
 
             {userList.length !== 0 && !loading && (
               <Box>
-                {userList.map((x, index) => (
-                  <TeamLayout key={index++} data={x} />
+                {Object.keys(userList).map((x) => (
+                  <TeamLayout key={x} data={userList[x]} teamName={x} />
                 ))}
               </Box>
             )}
           </Box>
-
-          <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={open}>
-            <Card sx={{ width: 550 }}>
-              <CardActions sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <IconButton onClick={handleClose}>
-                  <Close />
-                </IconButton>
-              </CardActions>
-              <CardContent sx={{ py: 1 }}>
-                <Typography textAlign="center" component="h1" variant="h6">
-                  Add users to start monitoring
-                </Typography>
-                <Stack direction="row" justifyContent="space-around" sx={{ mt: 3 }}>
-                  <Button
-                    variant="contained"
-                    sx={{ mt: 2, mb: 2, py: 1, px: 3, fontSize: 16 }}
-                    onClick={handleClose}
-                  >
-                    Add Later
-                  </Button>
-                  <Button
-                    variant="contained"
-                    sx={{ mt: 2, mb: 2, py: 1, px: 3, fontSize: 16 }}
-                    onClick={() => router.push("/dashboard/addusers")}
-                  >
-                    Add User
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Backdrop>
         </Container>
       </Box>
-    </>
+    </React.Fragment>
   );
 };
 

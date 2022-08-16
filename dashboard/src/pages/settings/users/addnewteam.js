@@ -26,7 +26,7 @@ const AddNewTeam = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    const data = JSON.parse(window.sessionStorage.getItem("user"));
     setOrganization(data.organization);
   }, []);
 

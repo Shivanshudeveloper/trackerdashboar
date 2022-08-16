@@ -134,7 +134,7 @@ const CreateReport = () => {
     value.forEach((x) => {
       teamUsersList.forEach((user) => {
         if (x === user.id) {
-          usersArr.push({ id: x, fullName: user.fullName });
+          usersArr.push({ id: x, fullName: user.fullName, profilePicture: user.profilePicture });
           names.push(user.fullName);
         }
       });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import { Box, Button, Stack, CircularProgress } from "@mui/material";
 import ReportLayout from "src/components/layouts/ReportLayout";
@@ -6,6 +6,7 @@ import SnackMessage from "src/components/SnackMessage";
 import ScheduledReportTable from "src/components/reports/ScheduledReportTable";
 import axios from "axios";
 import { API_SERVICE } from "src/config/uri";
+import { AuthContext } from "src/contextx/authContext";
 
 const ScheduledReports = () => {
   const [userData, setUserData] = useState(null);
@@ -16,11 +17,13 @@ const ScheduledReports = () => {
   const [message, setMessage] = useState("");
 
   const router = useRouter();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
+    if (user !== null) {
+      setUserData(user);
+    }
+  }, [user]);
 
   useEffect(async () => {
     if (userData !== null) {

@@ -11,58 +11,58 @@ import {
   Paper,
   Avatar,
 } from "@mui/material";
-
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData("Arun Kartik", 159, 6.0, 24, 4.0),
-  createData("Aditya Kapoor", 237, 9.0, 37, 4.3),
-  createData("Akash Sharma", 262, 16.0, 24, 6.0),
-  createData("Kumari Nidhi", 305, 3.7, 67, 4.3),
-  createData("Kishan Kumar", 356, 16.0, 49, 3.9),
-];
+import moment from "moment";
 
 const TimeSheetReportTable = (props) => {
-  const { teamName } = props;
+  const { data, dates } = props;
+
+  const getCount = (row) => {
+    let count = 0;
+    row.forEach((x) => {
+      count += parseInt(x.count);
+    });
+
+    return count;
+  };
+
   return (
     <Box sx={{ mt: 5 }}>
-      <Typography component="h1" variant="h4" sx={{ mb: 3, fontWeight: 500, fontSize: 24 }}>
-        {teamName}
-      </Typography>
+      <Typography
+        component="h1"
+        variant="h4"
+        sx={{ mb: 3, fontWeight: 500, fontSize: 24 }}
+      ></Typography>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
               <TableCell>Name</TableCell>
-              <TableCell align="center">Date 1</TableCell>
-              <TableCell align="center">Date 2</TableCell>
-              <TableCell align="center">Date 3</TableCell>
-              <TableCell align="center">Date 4</TableCell>
+              {dates.map((date) => (
+                <TableCell align="center">{moment(date).format("D MMM YYYY")}</TableCell>
+              ))}
               <TableCell align="center">Total Logged</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                <TableCell
-                  component="th"
-                  scope="row"
-                  sx={{ display: "flex", alignItems: "center", fontSize: 18 }}
-                >
-                  <Avatar
-                    src="https://gravallvar.se/wp-content/uploads/2017/11/person-dummy.jpg"
-                    sx={{ mr: 2 }}
-                  />
-                  {row.name}
-                </TableCell>
-                <TableCell align="center">{row.calories}</TableCell>
-                <TableCell align="center">{row.fat}</TableCell>
-                <TableCell align="center">{row.carbs}</TableCell>
-                <TableCell align="center">{row.protein}</TableCell>
-                <TableCell align="center">{row.protein}</TableCell>
-              </TableRow>
+            {data.map((item) => (
+              <>
+                {item.map((row, index) => (
+                  <TableRow key={index} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                    <TableCell
+                      component="th"
+                      scope="row"
+                      sx={{ display: "flex", alignItems: "center", fontSize: 18 }}
+                    >
+                      <Avatar src={row.profilePicture} sx={{ mr: 2 }} />
+                      {row.fullName}
+                    </TableCell>
+                    {dates.map((date) => (
+                      <TableCell align="center">{date === row.bucket ? row.sum : "--"}</TableCell>
+                    ))}
+                    <TableCell align="center">{getCount(item)}</TableCell>
+                  </TableRow>
+                ))}
+              </>
             ))}
           </TableBody>
         </Table>

@@ -25,7 +25,7 @@ const gettingActiveHoursOfTeam = asyncHandler(async (req, res, next) => {
       const activeData = await db.tracker_data.findAll({
         attributes: [
           'userid',
-          [sequelize.literal(`time_bucket('5 minutes', time)`), 'bucket'],
+          [sequelize.literal(`time_bucket('1 week', time)`), 'bucket'],
           [sequelize.fn('sum', sequelize.col('duration')), 'sum'],
           [sequelize.fn('count', sequelize.col('duration')), 'count'],
         ],
@@ -43,10 +43,64 @@ const gettingActiveHoursOfTeam = asyncHandler(async (req, res, next) => {
         team: user.team,
         activeData,
         fullName: user.fullName,
+        profilePicture: user.profilePicture,
       }
 
       dataArr.push(data)
     }
+    res.status(200).send(dataArr)
+  } catch (error) {
+    next(error)
+  }
+})
+
+const getProductiveHourOfTeam = asyncHandler(async (req, res, next) => {
+  try {
+    const { organization, team } = req.params
+
+    console.log(team)
+
+    let teamMember = []
+
+    if (team === 'All Teams') {
+      teamMember = await db.team_user.findAll({
+        where: { organization, role: 'Team Member' },
+      })
+    } else {
+      teamMember = await db.team_user.findAll({
+        where: { organization, role: 'Team Member', team },
+      })
+    }
+
+    const dataArr = []
+
+    for (let user of teamMember) {
+      const productiveData = await db.tracker_data.findAll({
+        attributes: [
+          'userid',
+          [sequelize.literal(`time_bucket('1 day', time)`), 'bucket'],
+          [sequelize.fn('sum', sequelize.col('duration')), 'sum'],
+          [sequelize.fn('count', sequelize.col('duration')), 'count'],
+        ],
+        where: {
+          organization,
+          [Op.and]: [sequelize.literal(`time > now() - (1*INTERVAL '6 days')`)],
+          userid: user.id,
+          type: 'Productive',
+        },
+        group: ['userid', 'bucket'],
+      })
+
+      let data = {
+        team: user.team,
+        productiveData,
+        fullName: user.fullName,
+        profilePicture: user.profilePicture,
+      }
+
+      dataArr.push(data)
+    }
+
     res.status(200).send(dataArr)
   } catch (error) {
     next(error)
@@ -90,6 +144,7 @@ const deleteApplicationType = asyncHandler(async (req, res) => {
 
 module.exports = {
   gettingActiveHoursOfTeam,
+  getProductiveHourOfTeam,
   saveApplicationType,
   getApplicationType,
   deleteApplicationType,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -12,22 +12,21 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   CircularProgress,
   Backdrop,
+  IconButton,
 } from "@mui/material";
 import SettingsLayout from "src/components/layouts/SettingsLayout";
 import SnackMessage from "src/components/SnackMessage";
-import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
-import { API_SERVICE } from "src/config/uri";
+import { storage, ref, getDownloadURL, uploadBytesResumable } from "src/config/firebase";
+import { CameraAlt } from "@mui/icons-material";
+import { AuthContext } from "src/contextx/authContext";
+import { TeamAndUserContext } from "src/contextx/teamAndUserContext";
 
 const AddNewUser = () => {
   // states
   const [teamList, setTeamList] = useState([]);
-  const [loginUserData, setLoginUserData] = useState(null);
   const [open, setOpen] = useState(false);
   const [variant, setVariant] = useState("error");
   const [message, setMessage] = useState("");
@@ -41,44 +40,48 @@ const AddNewUser = () => {
     password: null,
     profilePicture: null,
     role: null,
-    sharableLink: null,
     team: null,
-    trackBetween: null,
-    trackOn: null,
-    trackingMode: "visible",
   });
+  const [url, setUrl] = useState(null);
 
   const router = useRouter();
+  const { user } = useContext(AuthContext);
+  const { teams, addNewUser } = useContext(TeamAndUserContext);
 
   // getting authenticated user data and setting organization
   useEffect(() => {
-    const user = JSON.parse(window.sessionStorage.getItem("userData"));
-    setLoginUserData(user);
-    const data = {
-      ...userData,
-      organization: user.organization,
-    };
+    if (user !== null) {
+      const data = {
+        ...userData,
+        organization: user.organization,
+      };
 
-    setUserData(data);
-  }, []);
+      setUserData(data);
+    }
+  }, [user]);
 
   // getting and setting Team list for admin and team admin
   useEffect(async () => {
-    if (loginUserData !== null) {
-      const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${loginUserData.organization}`);
-
-      if (loginUserData.role === "Admin") {
-        setTeamList(data);
+    if (user !== null) {
+      if (user.role === "Admin") {
+        setTeamList(teams);
         return;
       }
 
-      setTeamList([{ team_name: loginUserData.team }]);
+      setTeamList([{ team_name: user.team }]);
     }
-  }, [loginUserData]);
+  }, [user]);
+
+  useEffect(() => {
+    if (url !== null) {
+      const temp = userData;
+      temp.profilePicture = url;
+      setUserData(temp);
+    }
+  }, [url]);
 
   // handling change of form fields
   const handleChange = (event) => {
-    console.log(event.target.name, event.target.value);
     const data = {
       ...userData,
       [event.target.name]: event.target.value,
@@ -102,29 +105,48 @@ const AddNewUser = () => {
     }
 
     setOpen(true);
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
 
     const body = { teamUsers: [userData] };
+    await addNewUser(body);
+    setOpen(false);
+    setMessage("User Added Successfully");
+    setVariant("success");
+    setSnackOpen(true);
+  };
 
-    await axios
-      .post(`${API_SERVICE}/api/teamUser/create`, body, config)
-      .then((res) => {
-        setOpen(false);
-        setMessage(res.data.message);
-        setVariant("success");
-        setSnackOpen(true);
-      })
-      .catch((error) => {
-        setOpen(false);
-        setMessage(error.message);
-        setVariant("error");
-        setSnackOpen(true);
-        console.log(error);
-      });
+  const changeHandler = (e) => {
+    const selected = e.target.files[0];
+    if (selected) {
+      const storageRef = ref(storage, `trackerData/profile/${userData.id}`);
+
+      const uploadTask = uploadBytesResumable(storageRef, selected);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+        (error) => {
+          console.log(error);
+        },
+        async () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setUrl(downloadURL);
+          });
+        }
+      );
+    } else {
+      console.log("Please again upload file");
+    }
   };
 
   // going back on cancel
@@ -137,7 +159,6 @@ const AddNewUser = () => {
     setOpen(false);
   };
 
-  // closing snack
   const snackClose = () => {
     setSnackOpen(false);
   };
@@ -168,7 +189,18 @@ const AddNewUser = () => {
           </Typography>
         </Grid>
         <Grid item md={4} sx={{ my: 3 }}>
-          <Avatar src="" sx={{ width: 120, height: 120 }} />
+          <Stack direction="row" alignItems="center">
+            {url === null ? (
+              <Avatar src={userData.profilePicture} sx={{ width: 120, height: 120, mx: 2 }} />
+            ) : (
+              <Avatar src={url} sx={{ width: 120, height: 120, mx: 2 }} />
+            )}
+
+            <IconButton sx={{ height: 40, width: 40 }} component="label" color="primary">
+              <CameraAlt />
+              <input hidden type="file" onChange={changeHandler} />
+            </IconButton>
+          </Stack>
         </Grid>
         <Grid item md={6} sx={{ my: 3 }}>
           <Box>
@@ -208,9 +240,9 @@ const AddNewUser = () => {
               <Grid item md={9}>
                 <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
                   <InputLabel>Role</InputLabel>
-                  {loginUserData !== null && (
+                  {user !== null && (
                     <>
-                      {loginUserData.role === "Admin" ? (
+                      {user.role === "Admin" ? (
                         <Select
                           value={userData.role}
                           name="role"
@@ -251,105 +283,54 @@ const AddNewUser = () => {
             onChange={(e) => handleChange(e)}
           />
         </Grid>
-
-        <Grid item md={2} sx={{ display: "flex", alignItems: "center", my: 3 }}>
-          <Typography component="h1" variant="h6">
-            Shareable Link:
-          </Typography>
-        </Grid>
-        <Grid item md={10} sx={{ my: 3, display: "flex" }}>
-          <OutlinedInput fullWidth sx={{ mr: 2, m: 1 }} />
-          <FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel>Invite User</InputLabel>
-            <Select label="Invite User">
-              <MenuItem value="">
-                <em>None</em>
-              </MenuItem>
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
       </Grid>
 
-      <Grid container sx={{ py: 2 }}>
-        <Grid item md={1.5} sx={{ py: 3 }}>
-          <Typography component="h1" variant="h6">
-            Tracking Mode
-          </Typography>
+      {/* <Box>
+        <Grid container>
+          <Grid item md={2} sx={{ display: "flex", alignItems: "center" }}>
+            <Typography component="h1" variant="h6">
+              Track On
+            </Typography>
+          </Grid>
+          <Grid item md={10}>
+            <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
+              <InputLabel>Track On</InputLabel>
+              <Select label="Track On">
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value={10}>Ten</MenuItem>
+                <MenuItem value={20}>Twenty</MenuItem>
+                <MenuItem value={30}>Thirty</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
         </Grid>
-        <Grid item md={4.5} sx={{ my: 2 }}>
-          <FormControl component="fieldset">
-            <RadioGroup
-              name="trackingMode"
-              defaultValue={userData.trackingMode}
-              onChange={(e) => handleChange(e)}
-            >
-              <FormControlLabel
-                sx={{ mb: 2 }}
-                value="stealth"
-                name="trackingMode"
-                control={<Radio />}
-                label="Stealth Mode"
-              />
-              <FormControlLabel
-                name="trackingMode"
-                value="visible"
-                control={<Radio />}
-                label="Visible Mode"
-              />
-            </RadioGroup>
-          </FormControl>
-        </Grid>
-        <Grid item md={6} sx={{ py: 1 }}>
-          <Box>
-            <Grid container>
-              <Grid item md={3} sx={{ display: "flex", alignItems: "center" }}>
-                <Typography component="h1" variant="h6">
-                  Track On
-                </Typography>
-              </Grid>
-              <Grid item md={9}>
-                <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
-                  <InputLabel>Track On</InputLabel>
-                  <Select label="Track On">
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Box>
+      </Box> */}
 
-          <Box>
-            <Grid container>
-              <Grid item md={3} sx={{ display: "flex", alignItems: "center" }}>
-                <Typography component="h1" variant="h6">
-                  Track Between
-                </Typography>
-              </Grid>
-              <Grid item md={9}>
-                <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
-                  <InputLabel>Track Between</InputLabel>
-                  <Select label="Track Between">
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Box>
+      {/* <Box>
+        <Grid container>
+          <Grid item md={2} sx={{ display: "flex", alignItems: "center" }}>
+            <Typography component="h1" variant="h6">
+              Track Between
+            </Typography>
+          </Grid>
+          <Grid item md={10}>
+            <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
+              <InputLabel>Track Between</InputLabel>
+              <Select label="Track Between">
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
+                <MenuItem value={10}>Ten</MenuItem>
+                <MenuItem value={20}>Twenty</MenuItem>
+                <MenuItem value={30}>Thirty</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
         </Grid>
-      </Grid>
+      </Box> */}
+
       <Stack direction="row" justifyContent="flex-end" sx={{ mt: 5 }}>
         <Button onClick={cancel} variant="contained" sx={{ px: 4, py: 1.2, fontSize: 16, mx: 0.5 }}>
           Cancel

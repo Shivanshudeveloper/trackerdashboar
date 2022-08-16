@@ -151,7 +151,7 @@ const UserSignIn = () => {
                 Sign In
               </Button>
 
-              <Link href="/user/welcome">
+              <Link href="/teamadmin/welcome">
                 <Typography
                   textAlign="center"
                   component="h1"

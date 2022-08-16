@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -12,6 +12,7 @@ import TimesheetLayout from "../../components/layouts/TimesheetLayout";
 import ActiveTeamsTable from "src/components/timesheet/ActiveTeamsTable";
 import axios from "axios";
 import { API_SERVICE } from "../../config/uri";
+import { AuthContext } from "src/contextx/authContext";
 
 const ActiveHours = () => {
   const [userData, setUserData] = useState(null);
@@ -20,10 +21,13 @@ const ActiveHours = () => {
   const [teamList, setTeamList] = useState([]);
   const [filter, setFilter] = useState("All Teams");
 
+  const { user } = useContext(AuthContext);
+
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
+    if (user !== null) {
+      setUserData(user);
+    }
+  }, [user]);
 
   const fetchTeamsData = async (team) => {
     try {

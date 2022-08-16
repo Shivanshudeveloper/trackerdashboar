@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -11,9 +11,8 @@ import {
 } from "@mui/material";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
-import axios from "axios";
-import { API_SERVICE } from "src/config/uri";
 import SnackMessage from "src/components/SnackMessage";
+import { AuthContext } from "src/contextx/authContext";
 
 const organisationName = () => {
   const [organization, setOrganization] = useState("");
@@ -32,54 +31,29 @@ const organisationName = () => {
   };
 
   const router = useRouter();
+  const { signedUpUser, updateOrgName, org } = useContext(AuthContext);
 
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
+    if (signedUpUser !== null) {
+      setUserData(signedUpUser);
+    }
+  }, [signedUpUser]);
+
+  useEffect(() => {
+    if (org !== null) {
+      router.push("/setupteams");
+    }
+  }, [org]);
 
   const updateOrganizationName = async () => {
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-      const body = {
-        organization,
-        email: userData.email,
-      };
-
-      if (organization === "") {
-        setVariant("error");
-        setMessage("Organization name cannot be empty");
-        setSnackOpen(true);
-        return;
-      }
-
-      setOpen(true);
-
-      await axios
-        .put(`${API_SERVICE}/api/admin/update`, body, config)
-        .then((res) => {
-          console.log("Admin updated");
-          const { data } = res;
-          window.sessionStorage.setItem("userData", JSON.stringify(data));
-          setOpen(false);
-          router.push("/setupteams");
-        })
-        .catch((e) => {
-          setOpen(false);
-          console.log(e);
-        });
-    } catch (error) {
-      setOpen(false);
+    if (organization === "") {
       setVariant("error");
-      setMessage(error.response.data.message);
+      setMessage("Organization name cannot be empty");
       setSnackOpen(true);
-      console.log(error);
+      return;
     }
+
+    updateOrgName(organization);
   };
 
   return (

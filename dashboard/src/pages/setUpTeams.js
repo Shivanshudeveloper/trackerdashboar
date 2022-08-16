@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -15,6 +15,7 @@ import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import { API_SERVICE } from "src/config/uri";
+import { AuthContext } from "src/contextx/authContext";
 
 const Field = (props) => {
   const { removeField, index, setTeamNames, teamNames } = props;
@@ -58,60 +59,42 @@ const Field = (props) => {
 const setUpTeams = () => {
   const [teamNames, setTeamNames] = useState([]);
   const [fields, setFields] = useState([1]);
-  const [organization, setOrganization] = useState("");
   const [open, setOpen] = useState(false);
+
+  const router = useRouter();
+  const { org, addTeams, teams } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (teams !== null) {
+      router.replace("/signin");
+    }
+  }, teams);
 
   const handleClose = () => {
     setOpen(false);
   };
-
-  useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setOrganization(data.organization);
-  }, []);
-
-  const router = useRouter();
 
   const addNewField = () => {
     setFields([...fields, 1]);
   };
 
   const removeField = (index) => {
-    console.log("removed");
     fields.splice(index, 1);
     teamNames.splice(index, 1);
     setFields([...fields]);
   };
 
   const addTeam = async () => {
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
+    const body = {
+      teamNames,
+      organization: org.id,
+    };
 
-      const body = {
-        teamNames,
-        organization,
-      };
-
-      setOpen(true);
-
-      await axios
-        .post(`${API_SERVICE}/api/team/create`, body, config)
-        .then((res) => console.log(res.data))
-        .then(() => setOpen(false))
-        .then(() => router.push("/signin"))
-        .catch((error) => console.log(error.response.data.message));
-    } catch (error) {
-      setOpen(false);
-      console.log(error);
-    }
+    addTeams(body);
   };
 
   return (
-    <>
+    <React.Fragment>
       <Stack
         direction="column"
         sx={{ px: 10, py: 8, height: "100vh" }}
@@ -176,7 +159,7 @@ const setUpTeams = () => {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
-    </>
+    </React.Fragment>
   );
 };
 

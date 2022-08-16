@@ -1,39 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
-import { Box, Button, CircularProgress, IconButton, Stack } from "@mui/material";
-import { Search } from "@mui/icons-material";
-import axios from "axios";
+import { Box, Button, CircularProgress, Stack } from "@mui/material";
 
 import SettingsLayout from "src/components/layouts/SettingsLayout";
 import AddUserAndTeamLayout from "src/components/settings/AddUserAndTeamLayout";
-import { API_SERVICE } from "src/config/uri";
+
+import { TeamAndUserContext } from "src/contextx/teamAndUserContext";
 
 const Users = () => {
-  const [open, setOpen] = useState(false);
-  const [userData, setUserData] = useState(null);
   const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(async () => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
+  const { users } = useContext(TeamAndUserContext);
 
-    if (data !== null && data !== undefined) {
-      try {
-        const users = await axios.get(`${API_SERVICE}/api/teamUsersByGroup/${data.organization}`);
-        console.log(users);
-        if (users.data.length === 0) {
-          setLoading(false);
-          setOpen(true);
-        } else {
-          setLoading(false);
-          setUserList(users.data);
-        }
-      } catch (error) {
-        console.log(error.message);
-      }
+  useEffect(() => {
+    if (users !== null) {
+      setLoading(false);
+      setUserList(users);
     }
-  }, []);
+  }, [users]);
 
   const router = useRouter();
 
@@ -54,9 +39,6 @@ const Users = () => {
         >
           Add User
         </Button>
-        <IconButton color="primary" sx={{ mx: 0.5 }}>
-          <Search fontSize="large" />
-        </IconButton>
       </Stack>
       {loading && (
         <Box
@@ -70,10 +52,11 @@ const Users = () => {
           <CircularProgress color="inherit" />
         </Box>
       )}
-      {userList.length !== 0 && !loading && (
+
+      {!loading && (
         <Box sx={{ my: 4 }}>
-          {userList.map((x, index) => (
-            <AddUserAndTeamLayout key={index++} data={x} />
+          {Object.keys(userList).map((x, index) => (
+            <AddUserAndTeamLayout key={index++} data={userList[x]} />
           ))}
         </Box>
       )}

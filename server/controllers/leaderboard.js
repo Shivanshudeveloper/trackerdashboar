@@ -60,11 +60,19 @@ const getActiveHours = asyncHandler(async (req, res, next) => {
 
     for (let i of data) {
       const id = i.userid
+      console.log('  ')
+      console.log(id)
 
       await db.team_user
         .findByPk(id)
         .then((user) => {
-          dataArr.push({ ...i.dataValues, fullName: user.fullName })
+          console.log(user.fullName)
+          console.log('  ')
+          dataArr.push({
+            ...i.dataValues,
+            fullName: user.fullName,
+            profilePicture: user.profilePicture,
+          })
         })
         .catch((error) => next(error))
     }
@@ -74,7 +82,8 @@ const getActiveHours = asyncHandler(async (req, res, next) => {
       dataArr,
     }
 
-    res.status(200).send(activeHours)
+    res.statusCode = 200
+    res.json(activeHours)
   } catch (error) {
     next(error)
   }
@@ -146,7 +155,11 @@ const getProductiveHours = asyncHandler(async (req, res, next) => {
       await db.team_user
         .findByPk(id)
         .then((user) => {
-          dataArr.push({ ...i.dataValues, fullName: user.fullName })
+          dataArr.push({
+            ...i.dataValues,
+            fullName: user.fullName,
+            profilePicture: user.profilePicture,
+          })
         })
         .catch((error) => next(error))
     }

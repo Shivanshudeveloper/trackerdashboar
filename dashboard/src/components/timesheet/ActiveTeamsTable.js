@@ -33,10 +33,7 @@ const Rows = (props) => {
         scope="row"
         sx={{ display: "flex", alignItems: "center", fontSize: 18 }}
       >
-        <Avatar
-          src="https://gravallvar.se/wp-content/uploads/2017/11/person-dummy.jpg"
-          sx={{ mr: 2 }}
-        />
+        <Avatar src={data.profilePicture} sx={{ mr: 2 }} />
 
         {data.fullName}
       </TableCell>

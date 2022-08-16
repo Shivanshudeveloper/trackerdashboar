@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -8,6 +8,7 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { AuthContext } from "src/contextx/authContext";
 
 const theme = createTheme();
 
@@ -16,11 +17,13 @@ const VerifyEmail = () => {
   const [email, setEmail] = useState("");
 
   const router = useRouter();
+  const { signedUpUser } = useContext(AuthContext);
 
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setEmail(data.email);
-  }, []);
+    if (signedUpUser !== null) {
+      setEmail(signedUpUser.email);
+    }
+  }, [signedUpUser]);
 
   const handleSubmit = () => {
     router.push("/organisationname");

@@ -67,7 +67,6 @@ const CreateReport = () => {
 
   const router = useRouter();
   const { id } = router.query;
-  console.log(id);
 
   // fetching login user data
   useEffect(() => {

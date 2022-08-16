@@ -109,6 +109,7 @@ const MostProductive = () => {
               pos={`${index + 1}`}
               posFont={font[index]}
               name={item.fullName}
+              pic={item.profilePicture}
               sum={item.sum}
               total={totalHours}
               type="Productive"

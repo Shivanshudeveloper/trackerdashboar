@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Box,
   Stack,
@@ -11,11 +11,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   Backdrop,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
 import { DatePicker, DateRangePicker } from "rsuite";
 
@@ -24,9 +22,11 @@ import SnackMessage from "src/components/SnackMessage";
 import { timezone } from "src/utils/timezone";
 import axios from "axios";
 import { API_SERVICE } from "src/config/uri";
+import { storage, ref, getDownloadURL, uploadBytesResumable } from "src/config/firebase";
+import { Create } from "@mui/icons-material";
+import { AuthContext } from "src/contextx/authContext";
 
 const Organization = () => {
-  const [userData, setUserData] = useState(null);
   const [details, setDetails] = useState({
     name: null,
     logo: null,
@@ -41,17 +41,16 @@ const Organization = () => {
   const [message, setMessage] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [url, setUrl] = useState(null);
 
-  useEffect(() => {
-    const user = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(user);
-  }, []);
+  const { user } = useContext(AuthContext);
 
   useEffect(async () => {
-    if (userData !== null) {
+    if (user !== null) {
       await axios
-        .get(`${API_SERVICE}/api/organization/${userData.organization}`)
+        .get(`${API_SERVICE}/api/organization/${user.organization}`)
         .then((res) => {
+          console.log(res.data);
           if (res.data !== null) {
             setDetails(res.data);
           }
@@ -59,7 +58,7 @@ const Organization = () => {
         })
         .catch((error) => console.log(error));
     }
-  }, [userData]);
+  }, [user]);
 
   // handling change of form fields
   const handleChange = (event) => {
@@ -108,6 +107,8 @@ const Organization = () => {
       id: details.id,
     };
 
+    console.log(body);
+
     await axios
       .put(`${API_SERVICE}/api/organization/update`, body, config)
       .then((res) => {
@@ -115,6 +116,14 @@ const Organization = () => {
         setVariant("success");
         setMessage(res.data);
         setSnackOpen(true);
+      })
+      .then(async () => {
+        await axios
+          .put(`${API_SERVICE}/api/admin/update`, { organization: details.name }, config)
+          .then(() => {
+            console.log("Admin Updated Successfully");
+          })
+          .catch((error) => console.log(error));
       })
       .catch((error) => {
         setVariant("error");
@@ -124,6 +133,14 @@ const Organization = () => {
       });
   };
 
+  useEffect(() => {
+    if (url !== null) {
+      const temp = details;
+      temp.logo = url;
+      setDetails(temp);
+    }
+  }, [url]);
+
   // closing backdrop
   const backdropClose = () => {
     setOpen(false);
@@ -132,6 +149,41 @@ const Organization = () => {
   // closing snack
   const snackClose = () => {
     setSnackOpen(false);
+  };
+
+  const changeHandler = (e) => {
+    const selected = e.target.files[0];
+    if (selected) {
+      const storageRef = ref(storage, `trackerData/organization/${details.id}`);
+
+      const uploadTask = uploadBytesResumable(storageRef, selected);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+        (error) => {
+          console.log(error);
+        },
+        async () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setUrl(downloadURL);
+          });
+        }
+      );
+    } else {
+      console.log("Please again upload file");
+    }
   };
 
   return (
@@ -146,9 +198,6 @@ const Organization = () => {
           onClick={() => saveDetails()}
         >
           Save Changes
-        </Button>
-        <Button variant="contained" sx={{ px: 4, py: 1.2, fontSize: 16, mx: 0.5 }}>
-          Add Users
         </Button>
       </Stack>
       {loading && (
@@ -186,7 +235,18 @@ const Organization = () => {
               </Typography>
             </Grid>
             <Grid item md={10} sx={{ my: 3 }}>
-              <Avatar src="" sx={{ width: 120, height: 120 }} />
+              <Stack direction="row" alignItems="center">
+                {url === null ? (
+                  <Avatar src={details.logo} sx={{ width: 120, height: 120, mx: 2 }} />
+                ) : (
+                  <Avatar src={url} sx={{ width: 120, height: 120, mx: 2 }} />
+                )}
+
+                <IconButton sx={{ height: 40, width: 40 }} component="label" color="primary">
+                  <Create />
+                  <input hidden type="file" onChange={changeHandler} />
+                </IconButton>
+              </Stack>
             </Grid>
 
             <Grid item md={2} sx={{ display: "flex", alignItems: "center", my: 3 }}>
@@ -231,35 +291,7 @@ const Organization = () => {
             Default Monitoring Settings
           </Typography>
 
-          <Grid container sx={{ py: 2 }}>
-            <Grid item md={1.5} sx={{ py: 3 }}>
-              <Typography component="h1" variant="h6">
-                Tracking Mode
-              </Typography>
-            </Grid>
-            <Grid item md={4.5} sx={{ my: 2 }}>
-              <FormControl component="fieldset">
-                <RadioGroup
-                  name="trackingMode"
-                  defaultValue={details.trackingMode}
-                  onChange={(e) => handleChange(e)}
-                >
-                  <FormControlLabel
-                    sx={{ mb: 2 }}
-                    value="stealth"
-                    name="trackingMode"
-                    control={<Radio />}
-                    label="Stealth Mode"
-                  />
-                  <FormControlLabel
-                    name="trackingMode"
-                    value="visible"
-                    control={<Radio />}
-                    label="Visible Mode"
-                  />
-                </RadioGroup>
-              </FormControl>
-            </Grid>
+          <Grid container sx={{ py: 2, mt: 3 }}>
             <Grid item md={6} sx={{ py: 1 }}>
               <Box>
                 <Grid container>

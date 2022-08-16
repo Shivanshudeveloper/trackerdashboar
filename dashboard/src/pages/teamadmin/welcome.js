@@ -53,14 +53,14 @@ const Welcome = () => {
     setOpen(true);
 
     await axios
-      .post(`${API_SERVICE}/api/validateTeamUser`, body, config)
+      .post(`${API_SERVICE}/api/teamUser/validate`, body, config)
       .then((res) => {
         console.log(res.data);
         window.sessionStorage.setItem("userData", JSON.stringify(res.data));
       })
       .then(() => {
         setOpen(false);
-        router.push("/user/verifyadminaccess");
+        router.push("/teamadmin/verifyadminaccess");
       })
       .catch((error) => {
         setOpen(false);
@@ -130,7 +130,7 @@ const Welcome = () => {
           </Box>
         </Box>
         <Typography textAlign="center" component="h2" variant="h5" sx={{ my: 2 }}>
-          Step 1/4
+          Step 1/3
         </Typography>
       </Stack>
       <SnackMessage

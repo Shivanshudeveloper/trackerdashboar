@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Box, FormControl, InputLabel, MenuItem, Select, CircularProgress } from "@mui/material";
 import LeaderboardLayout from "../../components/layouts/LeaderboardLayout";
 import PersonInfoBar from "src/components/leaderboard/PersonInfoBar";
 
 import axios from "axios";
 import { API_SERVICE } from "src/config/uri";
+import { AuthContext } from "src/contextx/authContext";
 
 const MostActive = () => {
   const [userData, setUserData] = useState(null);
@@ -17,10 +18,13 @@ const MostActive = () => {
   const bgColor = ["#ff4040", "#1e90ff", "#03c04a", "orange", "#f699cd"];
   const font = ["80px", "70px", "60px", "55px", "50px"];
 
+  const { user } = useContext(AuthContext);
+
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
+    if (user !== null) {
+      setUserData(user);
+    }
+  }, [user]);
 
   useEffect(async () => {
     if (userData !== null) {
@@ -35,7 +39,6 @@ const MostActive = () => {
       await axios
         .get(`${API_SERVICE}/api/leaderboard/activeHours/${userData.organization}/${selectedTeam}`)
         .then((res) => {
-          console.log(res.data);
           const total = res.data.totalHours[0].total;
           const data = res.data.dataArr;
 
@@ -49,6 +52,8 @@ const MostActive = () => {
         });
     }
   }, [userData, selectedTeam]);
+
+  console.log(leaderboardData);
 
   return (
     <Box
@@ -107,6 +112,7 @@ const MostActive = () => {
               pos={`${index + 1}`}
               posFont={font[index]}
               name={item.fullName}
+              pic={item.profilePicture}
               sum={item.sum}
               total={totalHours}
               type="Active"

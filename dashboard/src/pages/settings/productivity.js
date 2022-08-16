@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Box,
   Grid,
@@ -27,6 +27,7 @@ import SnackMessage from "src/components/SnackMessage";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import { API_SERVICE } from "src/config/uri";
+import { AuthContext } from "src/contextx/authContext";
 
 const Productivity = () => {
   const [userData, setUserData] = useState(null);
@@ -46,10 +47,13 @@ const Productivity = () => {
 
   const type = ["Productive", "Unproductive"];
 
+  const { user } = useContext(AuthContext);
+
   useEffect(() => {
-    const user = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(user);
-  }, []);
+    if (user !== null) {
+      setUserData(user);
+    }
+  }, [user]);
 
   useEffect(async () => {
     if (userData !== null) {

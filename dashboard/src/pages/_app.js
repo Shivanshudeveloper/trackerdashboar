@@ -10,6 +10,8 @@ import { theme } from "../theme";
 import "../styles/globals.css";
 import "rsuite/dist/rsuite.min.css";
 import { useRouter } from "next/router";
+import AuthProvider from "src/contextx/authContext";
+import TeamAndUserProvider from "src/contextx/teamAndUserContext";
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -21,12 +23,14 @@ const App = (props) => {
   const router = useRouter();
 
   useEffect(() => {
-    const user = window.sessionStorage.getItem("userData")
-      ? window.sessionStorage.getItem("userData")
+    const token = window.sessionStorage.getItem("authToken")
+      ? window.sessionStorage.getItem("authToken")
       : null;
 
-    if (user === null) {
+    if (token === null) {
       router.replace("/signin");
+    } else {
+      router.replace("/");
     }
   }, []);
 
@@ -36,12 +40,16 @@ const App = (props) => {
         <title>Material Kit Pro</title>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
       </Head>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          {getLayout(<Component {...pageProps} />)}
-        </ThemeProvider>
-      </LocalizationProvider>
+      <AuthProvider>
+        <TeamAndUserProvider>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              {getLayout(<Component {...pageProps} />)}
+            </ThemeProvider>
+          </LocalizationProvider>
+        </TeamAndUserProvider>
+      </AuthProvider>
     </CacheProvider>
   );
 };

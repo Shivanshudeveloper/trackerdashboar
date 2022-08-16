@@ -55,7 +55,7 @@ const ConfirmDetails = () => {
     await axios
       .post(`${API_SERVICE}/api/teamUser/update`, body, config)
       .then(() => {
-        router.push("/user/starttracking");
+        router.push("/");
         setOpen(false);
       })
       .catch((error) => {
@@ -222,7 +222,7 @@ const ConfirmDetails = () => {
           )}
         </Box>
         <Typography textAlign="center" component="h2" variant="h5" sx={{ my: 2 }}>
-          Step 3/4
+          Step 3/3
         </Typography>
       </Stack>
       <SnackMessage

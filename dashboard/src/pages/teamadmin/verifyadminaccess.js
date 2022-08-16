@@ -83,7 +83,7 @@ const VerifyAccess = () => {
 
       if (data) {
         setSnackOpen(false);
-        router.push("/user/confirmdetails");
+        router.push("/teamadmin/confirmdetails");
       }
     } catch (error) {
       setOpen(false);
@@ -153,7 +153,7 @@ const VerifyAccess = () => {
           </Box>
         </Box>
         <Typography textAlign="center" component="h2" variant="h5" sx={{ my: 2 }}>
-          Step 2/4
+          Step 2/3
         </Typography>
       </Stack>
       <SnackMessage

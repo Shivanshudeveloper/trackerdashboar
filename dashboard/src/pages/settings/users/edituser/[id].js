@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -12,73 +12,70 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   Backdrop,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
 import SettingsLayout from "src/components/layouts/SettingsLayout";
 import SaveChangeDialog from "src/components/settings/SaveChangeDialog";
 import RemoveDialog from "src/components/settings/RemoveDialog";
 import SnackMessage from "src/components/SnackMessage";
-import axios from "axios";
-import { API_SERVICE } from "src/config/uri";
+import { storage, ref, getDownloadURL, uploadBytesResumable } from "src/config/firebase";
+import { Create } from "@mui/icons-material";
+import { TeamAndUserContext } from "src/contextx/teamAndUserContext";
+import { AuthContext } from "src/contextx/authContext";
 
 const EditUser = () => {
   const [saveDialog, setSaveDialog] = useState(false);
   const [removeDialog, setRemoveDialog] = useState(false);
   const [teamList, setTeamList] = useState([]);
-  const [userData, setUserData] = useState(null);
-  const [loginUserData, setLoginUserData] = useState(null);
   const [open, setOpen] = useState(false);
   const [variant, setVariant] = useState("error");
   const [message, setMessage] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [url, setUrl] = useState(null);
 
   const router = useRouter();
 
   const { id } = router.query;
-
-  // getting login user data
-  useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setLoginUserData(data);
-  }, []);
+  const { user } = useContext(AuthContext);
+  const { teams, userData, getUserDetails, setUserData, updateUserDetails, deleteUser } =
+    useContext(TeamAndUserContext);
 
   // getting and setting Team list for admin and team admin
   useEffect(async () => {
-    if (loginUserData !== null) {
-      const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${loginUserData.organization}`);
-
-      if (loginUserData.role === "Admin") {
-        setTeamList(data);
+    if (user !== null) {
+      if (user.role === "Admin") {
+        setTeamList(teams);
         return;
       }
 
-      setTeamList([{ team_name: loginUserData.team }]);
+      setTeamList([{ team_name: user.team }]);
     }
-  }, [loginUserData]);
+  }, [user]);
 
-  useEffect(async () => {
+  useEffect(() => {
+    if (userData !== null) {
+      setLoading(false);
+    }
+  }, [userData]);
+
+  useEffect(() => {
     if (id === null || id === undefined) {
       return;
     }
 
-    await axios
-      .get(`${API_SERVICE}/api/teamUser/${id}`)
-      .then((res) => {
-        setUserData(res.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        setVariant("error");
-        setMessage(error.message);
-        setSnackOpen(true);
-        setLoading(false);
-      });
+    getUserDetails(id);
   }, [id]);
+
+  useEffect(() => {
+    if (url !== null) {
+      const temp = userData;
+      temp.profilePicture = url;
+      setUserData(temp);
+    }
+  }, [url]);
 
   const handleChangeClose = () => {
     setSaveDialog(false);
@@ -109,49 +106,60 @@ const EditUser = () => {
   const updateUser = async () => {
     setSaveDialog(false);
     setOpen(true);
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
 
     const body = {
       id,
       data: userData,
     };
 
-    await axios
-      .post(`${API_SERVICE}/api/teamUser/update`, body, config)
-      .then((res) => {
-        setMessage(res.data);
-        setVariant("success");
-        setSnackOpen(true);
-        setOpen(false);
-      })
-      .catch((error) => {
-        setMessage(error.message);
-        setVariant("error");
-        setSnackOpen(true);
-        setOpen(false);
-      });
+    await updateUserDetails(body);
+    setMessage("User Updated Successfully");
+    setVariant("success");
+    setSnackOpen(true);
+    setOpen(false);
   };
 
   const removeUser = async () => {
     setRemoveDialog(false);
     setOpen(true);
 
-    await axios
-      .delete(`${API_SERVICE}/api/teamUser/delete/${id}`)
-      .then(() => {
-        router.replace("/settings/users");
-      })
-      .catch((error) => {
-        setOpen(false);
-        setMessage(error.message);
-        setVariant("error");
-        setSnackOpen(true);
-        console.log(error);
-      });
+    await deleteUser(id);
+    router.replace("/settings/users");
+  };
+
+  const changeHandler = (e) => {
+    const selected = e.target.files[0];
+    if (selected) {
+      const storageRef = ref(storage, `trackerData/profile/${id}`);
+
+      const uploadTask = uploadBytesResumable(storageRef, selected);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+        (error) => {
+          console.log(error);
+        },
+        async () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setUrl(downloadURL);
+          });
+        }
+      );
+    } else {
+      console.log("Please again upload file");
+    }
   };
 
   return (
@@ -196,7 +204,18 @@ const EditUser = () => {
               </Typography>
             </Grid>
             <Grid item md={4} sx={{ my: 3 }}>
-              <Avatar src="" sx={{ width: 120, height: 120 }} />
+              <Stack direction="row" alignItems="center">
+                {url === null ? (
+                  <Avatar src={userData.profilePicture} sx={{ width: 120, height: 120, mx: 2 }} />
+                ) : (
+                  <Avatar src={url} sx={{ width: 120, height: 120, mx: 2 }} />
+                )}
+
+                <IconButton sx={{ height: 40, width: 40 }} component="label" color="primary">
+                  <Create />
+                  <input hidden type="file" onChange={changeHandler} />
+                </IconButton>
+              </Stack>
             </Grid>
 
             <Grid item md={6} sx={{ my: 3 }}>
@@ -237,9 +256,9 @@ const EditUser = () => {
                   <Grid item md={9}>
                     <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
                       <InputLabel>Role</InputLabel>
-                      {loginUserData !== null && (
+                      {user !== null && (
                         <>
-                          {loginUserData.role === "Admin" ? (
+                          {user.role === "Admin" ? (
                             <Select
                               value={userData.role}
                               name="role"
@@ -280,105 +299,6 @@ const EditUser = () => {
                 onChange={(e) => handleChange(e)}
               />
             </Grid>
-
-            <Grid item md={2} sx={{ display: "flex", alignItems: "center", my: 3 }}>
-              <Typography component="h1" variant="h6">
-                Shareable Link:
-              </Typography>
-            </Grid>
-            <Grid item md={10} sx={{ my: 3, display: "flex" }}>
-              <OutlinedInput fullWidth sx={{ mr: 2, m: 1 }} />
-              <FormControl variant="outlined" sx={{ m: 1, minWidth: 120 }}>
-                <InputLabel>Copy Link</InputLabel>
-                <Select label="Copy Link">
-                  <MenuItem value="">
-                    <em>None</em>
-                  </MenuItem>
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-
-          <Grid container sx={{ py: 2 }}>
-            <Grid item md={1.5} sx={{ py: 3 }}>
-              <Typography component="h1" variant="h6">
-                Tracking Mode
-              </Typography>
-            </Grid>
-            <Grid item md={4.5} sx={{ my: 2 }}>
-              <FormControl component="fieldset">
-                <RadioGroup
-                  name="trackingMode"
-                  defaultValue={userData.trackingMode}
-                  onChange={(e) => handleChange(e)}
-                >
-                  <FormControlLabel
-                    sx={{ mb: 2 }}
-                    value="stealth"
-                    name="trackingMode"
-                    control={<Radio />}
-                    label="Stealth Mode"
-                  />
-                  <FormControlLabel
-                    name="trackingMode"
-                    value="visible"
-                    control={<Radio />}
-                    label="Visible Mode"
-                  />
-                </RadioGroup>
-              </FormControl>
-            </Grid>
-
-            <Grid item md={6} sx={{ py: 1 }}>
-              <Box>
-                <Grid container>
-                  <Grid item md={3} sx={{ display: "flex", alignItems: "center" }}>
-                    <Typography component="h1" variant="h6">
-                      Track On
-                    </Typography>
-                  </Grid>
-                  <Grid item md={9}>
-                    <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
-                      <InputLabel>Track On</InputLabel>
-                      <Select label="Track On">
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-              </Box>
-
-              <Box>
-                <Grid container>
-                  <Grid item md={3} sx={{ display: "flex", alignItems: "center" }}>
-                    <Typography component="h1" variant="h6">
-                      Track Between
-                    </Typography>
-                  </Grid>
-                  <Grid item md={9}>
-                    <FormControl variant="outlined" sx={{ m: 1, minWidth: 400 }}>
-                      <InputLabel>Track Between</InputLabel>
-                      <Select label="Track Between">
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        <MenuItem value={10}>Ten</MenuItem>
-                        <MenuItem value={20}>Twenty</MenuItem>
-                        <MenuItem value={30}>Thirty</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Grid>
           </Grid>
         </>
       )}
@@ -386,7 +306,7 @@ const EditUser = () => {
       <Stack direction="row" justifyContent="flex-end" sx={{ mt: 5 }}>
         <Button
           variant="contained"
-          sx={{ px: 4, py: 1.2, fontSize: 16, mx: 0.5 }}
+          sx={{ px: 4, py: 1.2, fontSize: 16, mx: 0.5, backgroundColor: "red" }}
           onClick={() => setRemoveDialog(true)}
         >
           Remove User

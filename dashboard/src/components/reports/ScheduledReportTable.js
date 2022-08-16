@@ -10,7 +10,7 @@ import {
   TableBody,
   IconButton,
 } from "@mui/material";
-import { Delete, Edit } from "@mui/icons-material";
+import { Delete, Edit, Visibility } from "@mui/icons-material";
 import moment from "moment";
 
 const ScheduledReportTable = (props) => {
@@ -45,6 +45,12 @@ const ScheduledReportTable = (props) => {
               <TableCell align="center">{row.createdBy}</TableCell>
               <TableCell align="center">{row.shareWith}</TableCell>
               <TableCell align="center">
+                <IconButton
+                  color="secondary"
+                  onClick={() => router.push(`/reports/preview/${row.id}`)}
+                >
+                  <Visibility />
+                </IconButton>
                 <IconButton
                   onClick={() => router.push(`/reports/editreport/${row.id}`)}
                   color="info"

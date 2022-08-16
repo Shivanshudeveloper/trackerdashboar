@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import { Avatar, Box, Button, Card, Grid, Stack, Typography } from "@mui/material";
+import { AuthContext } from "src/contextx/authContext";
 
 const TeamLayout = (props) => {
   const [userData, setUserData] = useState(null);
 
+  const { user } = useContext(AuthContext);
+
   useEffect(() => {
-    const user = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(user);
-  }, []);
+    if (user !== null) {
+      setUserData(user);
+    }
+  }, [user]);
 
   const { data } = props;
   const router = useRouter();
@@ -19,7 +23,7 @@ const TeamLayout = (props) => {
         <Box sx={{ mt: 6 }}>
           <Stack direction="row" justifyContent="space-between">
             <Typography component="h1" variant="h5">
-              {`${data[0].team} (${data.length})`}
+              {`${props.teamName} (${data.length})`}
             </Typography>
 
             {userData !== null && (
@@ -37,7 +41,9 @@ const TeamLayout = (props) => {
                   <Button
                     variant="contained"
                     sx={{ py: 1 }}
-                    onClick={() => router.push("/dashboard/addusers")}
+                    onClick={() => {
+                      router.push("/dashboard/addusers");
+                    }}
                   >
                     Add User
                   </Button>
@@ -47,12 +53,12 @@ const TeamLayout = (props) => {
           </Stack>
 
           <Grid container sx={{ my: 2 }}>
-            {data.map((x) => (
+            {data.map((x, i) => (
               <Grid
+                key={i}
                 item
                 sm={6}
                 md={3}
-                lg={2.4}
                 sx={{ display: "flex", justifyContent: "center", p: 1 }}
               >
                 <Card
@@ -60,12 +66,17 @@ const TeamLayout = (props) => {
                     p: 2,
                     cursor: "pointer",
                     display: "flex",
+                    boxShadow: 10,
                     justifyContent: "space-between",
                     flexDirection: "column",
                     height: 160,
                     width: "100%",
                   }}
-                  onClick={() => router.push("user")}
+                  onClick={() => {
+                    x.role === "Team Member"
+                      ? router.push(`/user/${x.id}`)
+                      : console.log("clicked");
+                  }}
                 >
                   <Stack direction="row" alignItems="center">
                     {x.role === "Team Admin" ? (
@@ -81,7 +92,7 @@ const TeamLayout = (props) => {
                     )}
                   </Stack>
                   <Stack sx={{ mt: 2 }} direction="row" alignItems="center">
-                    <Avatar sx={{ bgcolor: "pink" }} />
+                    <Avatar src={x.profilePicture} sx={{ bgcolor: "pink" }} />
                     <Typography sx={{ ml: 3 }}>{x.fullName}</Typography>
                   </Stack>
                 </Card>
@@ -94,4 +105,4 @@ const TeamLayout = (props) => {
   );
 };
 
-export default TeamLayout;
+export default React.memo(TeamLayout);

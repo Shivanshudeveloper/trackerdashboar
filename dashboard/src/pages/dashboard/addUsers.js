@@ -34,6 +34,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { API_SERVICE } from "../../config/uri";
+import { useContext } from "react";
+import { AuthContext } from "src/contextx/authContext";
 
 const AddUsers = () => {
   const [name, setName] = useState("");
@@ -41,7 +43,6 @@ const AddUsers = () => {
   const [open, setOpen] = useState(false);
   const [defaultMode, setDefaultMode] = useState("stealth");
   const [teamList, setTeamList] = useState([]);
-  const [userData, setUserData] = useState(null);
   const [userList, setUserList] = useState([]);
   const [checked, setChecked] = useState([]);
   const [variant, setVariant] = useState("success");
@@ -52,27 +53,20 @@ const AddUsers = () => {
   const backdropClose = () => {
     setBackDropOpen(false);
   };
-
-  const organization = "Infosys";
+  const { user } = useContext(AuthContext);
   const router = useRouter();
 
-  useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
-
   useEffect(async () => {
-    if (userData !== null) {
-      const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${userData.organization}`);
-
-      if (userData.role === "Admin") {
+    if (user !== null) {
+      const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${user.organization}`);
+      if (user.role === "Admin") {
         setTeamList(data);
         return;
       }
 
-      setTeamList([{ team_name: userData.team }]);
+      setTeamList([{ team_name: user.team }]);
     }
-  }, [userData]);
+  }, [user]);
 
   const snackClose = () => {
     setSnackOpen(false);
@@ -100,17 +94,17 @@ const AddUsers = () => {
 
   const createUser = () => {
     const id = uuidv4();
-    const user = {
+    const userData = {
       id,
       name,
       email,
-      organization,
+      organization: user.organization,
       team: "",
       role: "",
       trackingMode: defaultMode,
       isVerified: false,
     };
-    setUserList([...userList, user]);
+    setUserList([...userList, userData]);
     setOpen(false);
     setName("");
     setEmail("");
@@ -181,6 +175,8 @@ const AddUsers = () => {
     }
   };
 
+  if (!user) return <></>;
+
   return (
     <>
       <Head>
@@ -247,9 +243,9 @@ const AddUsers = () => {
                   <TableCell align="center">
                     <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
                       <InputLabel>Role</InputLabel>
-                      {userData !== null && (
-                        <>
-                          {userData.role === "Admin" ? (
+                      {user !== null && (
+                        <React.Fragment>
+                          {user.role === "Admin" ? (
                             <Select
                               value={row.role}
                               onChange={(e) => selectRole(e, index)}
@@ -267,12 +263,8 @@ const AddUsers = () => {
                               <MenuItem value="Team Member">Team Member</MenuItem>
                             </Select>
                           )}
-                        </>
+                        </React.Fragment>
                       )}
-                      {/* <Select value={row.role} onChange={(e) => selectRole(e, index)} label="Role">
-                        <MenuItem value="Team Admin">Team Admin</MenuItem>
-                        <MenuItem value="Team Member">Team Member</MenuItem>
-                      </Select> */}
                     </FormControl>
                   </TableCell>
                   <TableCell align="center">{row.email}</TableCell>

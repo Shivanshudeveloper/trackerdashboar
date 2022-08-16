@@ -5,7 +5,7 @@ const SnackMessage = (props) => {
   const { variant, message, snackOpen, handleSnackClose } = props;
   return (
     <Snackbar open={snackOpen} autoHideDuration={4000} onClose={handleSnackClose}>
-      <Alert onClose={handleSnackClose} severity={variant} sx={{ width: "100%" }}>
+      <Alert variant="filled" onClose={handleSnackClose} severity={variant} sx={{ width: "100%" }}>
         {message}
       </Alert>
     </Snackbar>

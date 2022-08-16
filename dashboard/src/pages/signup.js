@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Button from "@mui/material/Button";
@@ -17,6 +17,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { API_SERVICE, Application_Id } from "../config/uri";
 import SnackMessage from "src/components/SnackMessage";
 import axios from "axios";
+import { AuthContext } from "src/contextx/authContext";
 
 const theme = createTheme();
 
@@ -26,12 +27,20 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmaPassword] = useState("");
   const [checked, setChecked] = useState(false);
-  const [variant, setVariant] = useState("");
+  const [variant, setVariant] = useState("success");
   const [message, setMessage] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
+  const { signUp, signedUpUser } = useContext(AuthContext);
+
+  useEffect(() => {
+    console.log(signedUpUser);
+    if (signedUpUser !== null) {
+      router.push({ pathname: "/verifyemail" });
+    }
+  }, [signedUpUser]);
 
   const handleClose = () => {
     setOpen(false);
@@ -72,63 +81,6 @@ const SignUp = () => {
       password: data.get("password"),
       fullName: data.get("name"),
     });
-  };
-
-  const signUp = (obj) => {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
-    const body = {
-      user: {
-        fullName: obj.fullName,
-        email: obj.email,
-        password: obj.password,
-      },
-      sendSetPasswordEmail: false,
-      skipVerification: false,
-      registration: {
-        applicationId: Application_Id,
-      },
-    };
-
-    setOpen(true);
-
-    axios
-      .post(`${API_SERVICE}/api/register`, body, config)
-      .then(async (res) => {
-        const successResponse = res.data;
-
-        const userData = {
-          id: successResponse.user.id,
-          fullName: successResponse.user.fullName,
-          email: successResponse.user.email,
-        };
-
-        console.log(userData);
-
-        const newBody = {
-          id: userData.id,
-          fullName: userData.fullName,
-          email: userData.email,
-        };
-
-        const { data } = await axios.post(`${API_SERVICE}/api/admin/register`, newBody, config);
-
-        window.sessionStorage.setItem("userData", JSON.stringify({ ...data, role: "Admin" }));
-        setOpen(false);
-
-        router.push({ pathname: "/verifyemail" });
-      })
-      .catch((error) => {
-        setOpen(false);
-        setVariant("error");
-        setMessage(error.response.data.message);
-        setSnackOpen(true);
-        console.log(`Error: ${error}`);
-      });
   };
 
   return (

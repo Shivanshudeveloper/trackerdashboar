@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Button from "@mui/material/Button";
@@ -11,9 +11,8 @@ import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { API_SERVICE } from "../config/uri";
 import SnackMessage from "src/components/SnackMessage";
-import axios from "axios";
+import { AuthContext } from "src/contextx/authContext";
 
 const theme = createTheme();
 
@@ -25,7 +24,14 @@ const SignIn = () => {
   const [snackOpen, setSnackOpen] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const { signIn, user, org } = useContext(AuthContext);
   const router = useRouter();
+
+  useEffect(() => {
+    if (user !== null) {
+      router.replace("/");
+    }
+  }, [user]);
 
   const handleClose = () => {
     setOpen(false);
@@ -51,37 +57,6 @@ const SignIn = () => {
       email: data.get("email"),
       password: data.get("password"),
     });
-  };
-
-  const signIn = (obj) => {
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
-    const body = {
-      email: obj.email,
-      password: obj.password,
-    };
-
-    setOpen(true);
-
-    axios
-      .post(`${API_SERVICE}/api/login`, body, config)
-      .then((res) => {
-        console.log(res.data);
-        window.sessionStorage.setItem("userData", JSON.stringify(res.data.user));
-        window.sessionStorage.setItem("authToken", res.data.token);
-        setOpen(false);
-        router.replace("/");
-      })
-      .catch((error) => {
-        setOpen(false);
-        setVariant("error");
-        setMessage(error.response.data.message);
-        setSnackOpen(true);
-      });
   };
 
   return (
@@ -162,7 +137,7 @@ const SignIn = () => {
                   Don't have an account? Sign Up
                 </Typography>
               </Link>
-              <Link href="/user/signin">
+              <Link href="/teamadmin/signin">
                 <Typography
                   textAlign="center"
                   component="h1"

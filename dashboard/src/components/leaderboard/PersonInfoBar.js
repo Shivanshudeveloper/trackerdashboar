@@ -3,7 +3,7 @@ import { Avatar, Grid, Stack, Typography } from "@mui/material";
 import { Star } from "@mui/icons-material";
 
 const PersonInfoBar = (props) => {
-  const { bgColor, pos, posFont, name, sum, total, type } = props;
+  const { bgColor, pos, posFont, name, sum, total, type, pic } = props;
   const [starArr, setStarArr] = useState([]);
 
   const percent = (sum / total) * 100;
@@ -66,7 +66,7 @@ const PersonInfoBar = (props) => {
         }}
       >
         <Avatar
-          src="https://gravallvar.se/wp-content/uploads/2017/11/person-dummy.jpg"
+          src={pic}
           sx={{ width: 165, height: 165, position: "absolute", bottom: 0, right: -25 }}
         />
       </Grid>
