@@ -24,10 +24,12 @@ import { storage, ref, getDownloadURL, uploadBytesResumable } from "src/config/f
 import { Create } from "@mui/icons-material";
 import { TeamAndUserContext } from "src/contextx/teamAndUserContext";
 import { AuthContext } from "src/contextx/authContext";
+import ResetIdDialog from "src/components/settings/ResetIdDialog";
 
 const EditUser = () => {
   const [saveDialog, setSaveDialog] = useState(false);
   const [removeDialog, setRemoveDialog] = useState(false);
+  const [resetIdDialog, setResetIdDialog] = useState(false);
   const [teamList, setTeamList] = useState([]);
   const [open, setOpen] = useState(false);
   const [variant, setVariant] = useState("error");
@@ -40,7 +42,7 @@ const EditUser = () => {
 
   const { id } = router.query;
   const { user } = useContext(AuthContext);
-  const { teams, userData, getUserDetails, setUserData, updateUserDetails, deleteUser } =
+  const { teams, userData, getUserDetails, setUserData, updateUserDetails, deleteUser, resetId } =
     useContext(TeamAndUserContext);
 
   // getting and setting Team list for admin and team admin
@@ -83,6 +85,10 @@ const EditUser = () => {
 
   const handleRemoveClose = () => {
     setRemoveDialog(false);
+  };
+
+  const handleResetIdClose = () => {
+    setResetIdDialog(false);
   };
 
   const backdropClose = () => {
@@ -160,6 +166,11 @@ const EditUser = () => {
     } else {
       console.log("Please again upload file");
     }
+  };
+
+  const resetUserId = (newId, currentId) => {
+    resetId(newId, currentId);
+    setResetIdDialog(false);
   };
 
   return (
@@ -314,6 +325,13 @@ const EditUser = () => {
         <Button
           variant="contained"
           sx={{ px: 4, py: 1.2, fontSize: 16, mx: 0.5 }}
+          onClick={() => setResetIdDialog(true)}
+        >
+          Reset Application UserId
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ px: 4, py: 1.2, fontSize: 16, mx: 0.5 }}
           onClick={() => router.push("/settings/users")}
         >
           Cancel
@@ -326,6 +344,12 @@ const EditUser = () => {
           Save
         </Button>
       </Stack>
+      <ResetIdDialog
+        resetId={resetUserId}
+        open={resetIdDialog}
+        handleClose={handleResetIdClose}
+        id={id}
+      />
       <SaveChangeDialog
         updateUser={updateUser}
         open={saveDialog}

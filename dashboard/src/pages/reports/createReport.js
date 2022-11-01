@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -23,6 +23,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import { API_SERVICE } from "../../config/uri";
 import SnackMessage from "src/components/SnackMessage";
+import { AuthContext } from "src/contextx/authContext";
+import { TeamAndUserContext } from "src/contextx/teamAndUserContext";
 
 const shareReportArr = ["One Time", "Daily", "Weekly", "Monthly", "Annually", "Fortnightly"];
 const ITEM_HEIGHT = 48;
@@ -37,7 +39,6 @@ const MenuProps = {
 };
 
 const CreateReport = () => {
-  const [userData, setUserData] = useState(null);
   const [teamList, setTeamList] = useState([]);
   const [userList, setUserList] = useState([]);
   const [teamUsersList, setTeamUsersList] = useState([]);
@@ -66,41 +67,36 @@ const CreateReport = () => {
   const [message, setMessage] = useState("");
 
   const router = useRouter();
-
-  // fetching login user data
-  useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
+  const { user } = useContext(AuthContext);
+  const { teams } = useContext(TeamAndUserContext);
 
   // fetching ans setting teams
   useEffect(async () => {
-    if (userData !== null) {
+    if (user !== null) {
       try {
-        const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${userData.organization}`);
-        if (userData.role === "Admin") {
-          setTeamList(data);
+        if (user.role === "Admin") {
+          setTeamList(teams);
           return;
         }
 
-        setTeamList([{ team_name: userData.team }]);
+        setTeamList([{ team_name: user.team }]);
       } catch (error) {
         console.log(error);
       }
     }
-  }, [userData]);
+  }, [user]);
 
   // fetching all users list
   useEffect(async () => {
-    if (userData !== null) {
+    if (user !== null) {
       try {
-        const { data } = await axios.get(`${API_SERVICE}/api/teamUsers/${userData.organization}`);
+        const { data } = await axios.get(`${API_SERVICE}/api/teamUsers/${user.organization}`);
         setUserList(data);
       } catch (error) {
         console.log(error);
       }
     }
-  }, [userData]);
+  }, [user]);
 
   // setting user list for selected teams
   useEffect(() => {
@@ -225,8 +221,8 @@ const CreateReport = () => {
         shareWith: shareWith,
         team: teamName,
         users: users,
-        createdBy: userData.id,
-        organization: userData.organization,
+        createdBy: user.id,
+        organization: user.organization,
         type: "scheduled",
       };
 

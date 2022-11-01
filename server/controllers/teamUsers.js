@@ -8,11 +8,15 @@ const addUsers = asyncHandler(async (req, res, next) => {
     const { teamUsers } = req.body
     const time = new Date().getTime()
 
+    console.log(req.body)
+
     try {
         for (let i of teamUsers) {
             const user = await db.team_user.findOne({
                 where: { email: i.email },
             })
+
+            console.log(user)
 
             if (user) {
                 res.statusCode = 400
@@ -37,6 +41,7 @@ const addUsers = asyncHandler(async (req, res, next) => {
         res.statusCode = 200
         res.json({ message: 'Users added successfully' })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 })
@@ -343,6 +348,32 @@ const deleteTeamUser = asyncHandler(async (req, res, next) => {
         .catch((error) => next(error))
 })
 
+const resetUserId = asyncHandler(async (req, res) => {
+    const { currentId, newId } = req.body
+    console.log(currentId)
+    console.log(newId)
+
+    try {
+        const user = await db.application_ids.findOne({
+            where: { userId: currentId },
+        })
+
+        if (!user) {
+            res.status(404).json({ message: 'No user found' })
+            return
+        }
+
+        await db.application_ids.update(
+            { userId: newId },
+            { where: { userId: currentId } }
+        )
+
+        res.status(200).json({ message: 'User Id updated successfully' })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+})
+
 module.exports = {
     addUsers,
     teamAdminLogin,
@@ -357,4 +388,5 @@ module.exports = {
     getTeamUserScreenshots,
     getUsersCount,
     deleteTeamUser,
+    resetUserId,
 }

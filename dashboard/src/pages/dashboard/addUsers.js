@@ -351,12 +351,12 @@ const AddUsers = () => {
           <Button onClick={createUser}>Create</Button>
         </DialogActions>
       </Dialog>
-      <SnackMessage
+      {/* <SnackMessage
         variant={variant}
         message={message}
         snackOpen={snackOpen}
         handleSnackClose={snackClose}
-      />
+      /> */}
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={backDropOpen}

@@ -80,6 +80,20 @@ const TeamAndUserProvider = ({ children }) => {
     }
   };
 
+  const resetId = async (newId, currentId) => {
+    try {
+      const body = {
+        currentId: currentId,
+        newId: newId,
+      };
+
+      const { data } = await axios.put(`${API_SERVICE}/api/teamUser/resetId`, body, config);
+      console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <TeamAndUserContext.Provider
       value={{
@@ -93,6 +107,7 @@ const TeamAndUserProvider = ({ children }) => {
         updateUserDetails,
         deleteUser,
         addNewUser,
+        resetId,
       }}
     >
       {children}

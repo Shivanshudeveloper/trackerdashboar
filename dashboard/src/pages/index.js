@@ -18,6 +18,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import TeamLayout from "../components/dashboard/TeamLayout";
 import DashboardLayout from "src/components/layouts/DashboardLayout";
 import { TeamAndUserContext } from "src/contextx/teamAndUserContext";
+import { AuthContext } from "src/contextx/authContext";
 
 const Dashboard = () => {
   const [teamList, setTeamList] = useState([]);
@@ -25,9 +26,14 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("All Teams");
 
-  const { teams, users } = useContext(TeamAndUserContext);
+  const { teams, users, getUsersByGroup } = useContext(TeamAndUserContext);
+  const { user } = useContext(AuthContext);
 
   const router = useRouter();
+
+  useEffect(() => {
+    getUsersByGroup(user?.organization);
+  }, [user]);
 
   useEffect(() => {
     setTeamList(teams);

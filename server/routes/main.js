@@ -29,6 +29,7 @@ const {
     getTeamUserScreenshots,
     getUsersCount,
     deleteTeamUser,
+    resetUserId,
 } = require('../controllers/teamUsers')
 
 const {
@@ -108,6 +109,7 @@ router.get('/teamUser/productivity/:id', getTeamUserProductivity)
 router.get('/teamUser/screenshots/:id', getTeamUserScreenshots)
 router.get('/teamUser/count/:organization', getUsersCount)
 router.put('/teamUser/delete/:id', deleteTeamUser)
+router.put('/teamUser/resetId', resetUserId)
 
 // *************** Active and Inactive USERS *************** //
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Box, Button } from "@mui/material";
 import MainLayout from "src/components/layouts/MainLayout";
@@ -10,23 +10,19 @@ import AppUsageReport from "src/components/reports/AppUsageReport";
 import ScreenshotsReport from "src/components/reports/ScreenshotsReport";
 import TimesheetReport from "src/components/reports/TimesheetReport";
 import { API_SERVICE } from "src/config/uri";
+import { AuthContext } from "src/contextx/authContext";
 
 const Preview = () => {
-  const [userData, setUserData] = useState(null);
   const [report, setReport] = useState({});
   const [categories, setCategories] = useState([]);
 
   const router = useRouter();
 
   const { id } = router.query;
-
-  useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
+  const { user } = useContext(AuthContext);
 
   useEffect(async () => {
-    if (id !== null && id !== undefined && userData !== null) {
+    if (id !== null && id !== undefined && user !== null) {
       await axios
         .get(`${API_SERVICE}/api/report/${id}`)
         .then((res) => {
@@ -38,7 +34,7 @@ const Preview = () => {
           console.log(error);
         });
     }
-  }, [id, userData]);
+  }, [id, user]);
 
   return (
     <Box sx={{ width: "100%", height: "100%" }}>
