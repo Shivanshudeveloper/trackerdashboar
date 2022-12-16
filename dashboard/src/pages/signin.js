@@ -23,15 +23,10 @@ const SignIn = () => {
   const [message, setMessage] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  const [disabled, setDisabled] = useState(false)
 
-  const { signIn, user, org } = useContext(AuthContext);
+  const { signIn } = useContext(AuthContext);
   const router = useRouter();
-
-  useEffect(() => {
-    if (user !== null) {
-      router.replace("/");
-    }
-  }, [user]);
 
   const handleClose = () => {
     setOpen(false);
@@ -53,10 +48,15 @@ const SignIn = () => {
       return;
     }
 
-    signIn({
+    setDisabled(true)
+    const res = signIn({
       email: data.get("email"),
       password: data.get("password"),
     });
+
+    if (res) {
+      router.replace('/dashboard')
+    }
   };
 
   return (
@@ -121,6 +121,7 @@ const SignIn = () => {
               <Button
                 fullWidth
                 type="submit"
+                disabled={disabled}
                 variant="contained"
                 sx={{ mt: 2, mb: 2, py: 1.4, px: 4.2, fontSize: 16 }}
               >

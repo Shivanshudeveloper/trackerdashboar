@@ -18,7 +18,7 @@ const MostProductive = () => {
   const font = ["80px", "70px", "60px", "55px", "50px"];
 
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    const data = JSON.parse(window.localStorage.getItem("userData"));
     setUserData(data);
   }, []);
 
@@ -30,18 +30,19 @@ const MostProductive = () => {
   }, [userData]);
 
   useEffect(async () => {
-    if (userData !== null) {
+    if (userData) {
       setLoading(true);
       await axios
         .get(
           `${API_SERVICE}/api/leaderboard/productiveHours/${userData.organization}/${selectedTeam}`
         )
         .then((res) => {
-          console.log(res.data);
-          const total = res.data.totalHours[0].total;
+          let total
           const data = res.data.dataArr;
-
-          setTotalHours(total);
+          total = res.data.totalHours[0].total;
+          if (total) {
+            setTotalHours(total);
+          }
           setleaderboardData(data);
           setLoading(false);
         })
@@ -75,7 +76,7 @@ const MostProductive = () => {
             ))}
           </Select>
         </FormControl>
-        <FormControl variant="filled" sx={{ minWidth: 250, mr: 3, alignSelf: "flex-end" }}>
+        {/* <FormControl variant="filled" sx={{ minWidth: 250, mr: 3, alignSelf: "flex-end" }}>
           <InputLabel id="demo-simple-select-filled-label">Month</InputLabel>
           <Select labelId="demo-simple-select-filled-label" id="demo-simple-select-filled">
             <MenuItem value="">
@@ -85,7 +86,7 @@ const MostProductive = () => {
             <MenuItem value={20}>Twenty</MenuItem>
             <MenuItem value={30}>Thirty</MenuItem>
           </Select>
-        </FormControl>
+        </FormControl> */}
       </Box>
 
       {loading && (
@@ -93,7 +94,7 @@ const MostProductive = () => {
           sx={{
             display: "flex",
             justifyContent: "center",
-            height: 500,
+            height: 200,
             alignItems: "center",
           }}
         >

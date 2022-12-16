@@ -336,6 +336,7 @@ const getUsersCount = asyncHandler(async (req, res, next) => {
         res.statusCode = 200
         res.json({ allUsers, active: active.length, inactive })
     } catch (error) {
+        console.error(error.message)
         next(error)
     }
 })

@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       icon: DataTypes.STRING,
       imgName: DataTypes.ARRAY(DataTypes.STRING),
       time: DataTypes.DATE,
+      visibility: DataTypes.BOOLEAN
     },
     {
       sequelize,

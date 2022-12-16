@@ -9,7 +9,7 @@ const TeamLayout = (props) => {
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    if (user !== null) {
+    if (user) {
       setUserData(user);
     }
   }, [user]);

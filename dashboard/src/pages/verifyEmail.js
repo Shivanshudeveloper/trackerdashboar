@@ -20,7 +20,7 @@ const VerifyEmail = () => {
   const { signedUpUser } = useContext(AuthContext);
 
   useEffect(() => {
-    if (signedUpUser !== null) {
+    if (signedUpUser?.email) {
       setEmail(signedUpUser.email);
     }
   }, [signedUpUser]);

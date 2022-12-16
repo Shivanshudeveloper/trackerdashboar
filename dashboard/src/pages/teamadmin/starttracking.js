@@ -24,7 +24,7 @@ const StartTracking = () => {
   const router = useRouter();
 
   const start = () => {
-    router.push("/");
+    router.push("/dashboard");
   };
   return (
     <>

@@ -50,22 +50,27 @@ const Productivity = () => {
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    if (user !== null) {
+    if (user) {
       setUserData(user);
     }
   }, [user]);
 
   useEffect(async () => {
-    if (userData !== null) {
-      const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${userData.organization}`);
-      setTeamList(data);
-      setSelectedTeamName(data[0].team_name);
+    if (userData) {
+      const org = userData?.organization
+      if (org) {
+        const { data } = await axios.get(`${API_SERVICE}/api/getTeams/${org}`);
+        setTeamList(data);
+        if (data[0]) {
+          setSelectedTeamName(data[0].team_name);
+        }
+      }
     }
   }, [userData]);
 
   // getting all categories of an organization
   useEffect(async () => {
-    if (userData !== null) {
+    if (userData) {
       await axios
         .get(`${API_SERVICE}/api/category/${userData.organization}`)
         .then((res) => {

@@ -1,10 +1,10 @@
 {
   "development": {
     "username": "tsdbadmin",
-    "password": "exrnshmaoj6eufzz",
+    "password": "p33jhjmu063umsdi",
     "database": "tsdb",
-    "host": "f7lgrscmtu.n81amyf485.tsdb.cloud.timescale.com",
-    "port": "33464",
+    "host": "c0o13btsdz.g1v6mx0uw5.tsdb.cloud.timescale.com",
+    "port": "37941",
     "dialect": "postgres",
     "protocol": "postgres",
     "dialectOptions": {
@@ -16,10 +16,10 @@
   },
   "test": {
     "username": "tsdbadmin",
-    "password": "exrnshmaoj6eufzz",
+    "password": "p33jhjmu063umsdi",
     "database": "tsdb",
-    "host": "f7lgrscmtu.n81amyf485.tsdb.cloud.timescale.com",
-    "port": "33464",
+    "host": "c0o13btsdz.g1v6mx0uw5.tsdb.cloud.timescale.com",
+    "port": "37941",
     "dialect": "postgres",
     "protocol": "postgres",
     "dialectOptions": {
@@ -31,10 +31,10 @@
   },
   "production": {
     "username": "tsdbadmin",
-    "password": "exrnshmaoj6eufzz",
+    "password": "p33jhjmu063umsdi",
     "database": "tsdb",
-    "host": "f7lgrscmtu.n81amyf485.tsdb.cloud.timescale.com",
-    "port": "33464",
+    "host": "c0o13btsdz.g1v6mx0uw5.tsdb.cloud.timescale.com",
+    "port": "37941",
     "dialect": "postgres",
     "protocol": "postgres",
     "dialectOptions": {

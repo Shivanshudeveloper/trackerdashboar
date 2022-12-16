@@ -15,7 +15,7 @@ const ConfirmDetails = () => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    const data = JSON.parse(window.localStorage.getItem("userData"));
     setUserData(data);
   }, []);
 
@@ -55,7 +55,7 @@ const ConfirmDetails = () => {
     await axios
       .post(`${API_SERVICE}/api/teamUser/update`, body, config)
       .then(() => {
-        router.push("/");
+        router.push("/dashboard");
         setOpen(false);
       })
       .catch((error) => {

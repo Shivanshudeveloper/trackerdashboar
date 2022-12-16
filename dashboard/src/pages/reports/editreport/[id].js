@@ -70,7 +70,7 @@ const CreateReport = () => {
 
   // fetching login user data
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    const data = JSON.parse(window.localStorage.getItem("userData"));
     setUserData(data);
   }, []);
 

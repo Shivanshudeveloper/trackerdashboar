@@ -17,7 +17,7 @@ const SecondaryNavbar = () => {
     >
       <Stack direction="row" justifyContent="center">
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/">Dashboard</Link>
+          <Link href="/dashboard">Dashboard</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
           <Link href="/leaderboard/mostactive">Leaderboard</Link>

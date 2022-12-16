@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import { API_SERVICE, Application_Id } from "src/config/uri";
+import { isJwtExpired } from 'jwt-check-expiration';
 
 export const AuthContext = createContext();
 
@@ -9,18 +10,24 @@ const AuthProvider = ({ children }) => {
   const [signedUpUser, setSignedUpUser] = useState(null);
   const [org, setOrg] = useState(null);
   const [teams, setTeams] = useState(null);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
-    const userData = window.sessionStorage.getItem("user")
-      ? JSON.parse(window.sessionStorage.getItem("user"))
+    const userData = window.localStorage.getItem("user")
+      ? JSON.parse(window.localStorage.getItem("user"))
       : null;
 
-    const organization = window.sessionStorage.getItem("org")
-      ? JSON.parse(window.sessionStorage.getItem("org"))
+    const organization = window.localStorage.getItem("org")
+      ? JSON.parse(window.localStorage.getItem("org"))
       : null;
+
+    const authToken = window.localStorage.getItem("token")
+    ? window.localStorage.getItem("token")
+    : null;
 
     setOrg(organization);
     setUser(userData);
+    setToken(authToken);
   }, []);
 
   const config = {
@@ -29,14 +36,24 @@ const AuthProvider = ({ children }) => {
     },
   };
 
+  const isAuthenticated = () => {
+    console.log(isJwtExpired(token))
+    if (token) {
+      return !isJwtExpired(token)
+    }
+    return false;
+  }
+
   const signIn = async (obj) => {
     try {
       const { data } = await axios.post(`${API_SERVICE}/api/login`, obj, config);
-      window.sessionStorage.setItem("authToken", data.token);
-      window.sessionStorage.setItem("user", JSON.stringify({ ...data.user, role: "Admin" }));
+      window.localStorage.setItem("token", data.token);
+      window.localStorage.setItem("user", JSON.stringify({ ...data.user, role: "Admin" }));
       setUser(data.user);
+      return true
     } catch (error) {
       console.log(error.message);
+      return false
     }
   };
 
@@ -57,10 +74,15 @@ const AuthProvider = ({ children }) => {
 
       const res = await axios.post(`${API_SERVICE}/api/register`, body, config);
 
+      const token = res.data?.token
+      if (token) {
+        localStorage.setItem('token', token)
+      }
+
       const userData = {
-        id: res.data.user.id,
-        fullName: res.data.user.fullName,
-        email: res.data.user.email,
+        id: res.data?.user.id,
+        fullName: res.data?.user.fullName,
+        email: res.data?.user.email,
       };
 
       const { data } = await axios.post(`${API_SERVICE}/api/admin/register`, userData, config);
@@ -104,7 +126,7 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ signIn, user, signUp, signedUpUser, updateOrgName, org, addTeams, teams }}
+      value={{ signIn, user, signUp, signedUpUser, updateOrgName, org, addTeams, teams, isAuthenticated, token }}
     >
       {children}
     </AuthContext.Provider>

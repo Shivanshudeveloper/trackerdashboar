@@ -32,7 +32,7 @@ const VerifyAccess = () => {
   const [dialog, setDialog] = useState(false);
 
   useEffect(() => {
-    const data = JSON.parse(window.sessionStorage.getItem("userData"));
+    const data = JSON.parse(window.localStorage.getItem("userData"));
     setUserData(data);
   }, []);
 

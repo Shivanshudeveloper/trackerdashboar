@@ -28,10 +28,10 @@ const SettingsNavbar = () => {
           <Link href="/settings/screenshots">Screenshots</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/">Integrations</Link>
+          <Link href="/dashboard">Integrations</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/">Billing</Link>
+          <Link href="/dashboard">Billing</Link>
         </Typography>
       </Stack>
     </Toolbar>

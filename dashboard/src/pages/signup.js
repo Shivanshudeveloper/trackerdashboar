@@ -14,9 +14,7 @@ import Grid from "@mui/material/Grid";
 import { Google } from "@mui/icons-material";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { API_SERVICE, Application_Id } from "../config/uri";
 import SnackMessage from "src/components/SnackMessage";
-import axios from "axios";
 import { AuthContext } from "src/contextx/authContext";
 
 const theme = createTheme();
@@ -35,9 +33,8 @@ const SignUp = () => {
   const router = useRouter();
   const { signUp, signedUpUser } = useContext(AuthContext);
 
-  useEffect(() => {
-    console.log(signedUpUser);
-    if (signedUpUser !== null) {
+  useEffect(() => {    
+    if (signedUpUser) {
       router.push({ pathname: "/verifyemail" });
     }
   }, [signedUpUser]);
@@ -104,7 +101,7 @@ const SignUp = () => {
         <Grid item xs={12} sm={8} md={6} component={Paper} elevation={6} square>
           <Box
             sx={{
-              my: 8,
+              mt: 5,
               mx: 8,
               px: 10,
               display: "flex",
@@ -179,16 +176,16 @@ const SignUp = () => {
                 }
                 label="I have read and agreed to the Terms of Service"
               />
-              <Box sx={{ display: "flex", flexDirection: "row-reverse" }}>
+              <Box>
                 <Button
                   type="submit"
                   variant="contained"
-                  sx={{ mt: 2, mb: 2, py: 1.4, px: 4.2, fontSize: 16 }}
+                  sx={{ mt: 2, mb: 2, py: 1.4, px: 4.2, fontSize: 16, width: '100%' }}
                 >
                   Sign Up
                 </Button>
               </Box>
-              <Box>
+              {/* <Box>
                 <Button
                   fullWidth
                   variant="outlined"
@@ -197,15 +194,14 @@ const SignUp = () => {
                 >
                   Sign Up with Google
                 </Button>
-              </Box>
+              </Box> */}
               <Link href="/signin">
                 <Typography
                   textAlign="center"
-                  component="h1"
                   variant="h6"
-                  sx={{ cursor: "pointer" }}
+                  sx={{ cursor: "pointer" , mt: 2}}
                 >
-                  Already have an account? Sign In
+                  Already have an account? <span style={{color: '#007bff'}}>Sign In</span>
                 </Typography>
               </Link>
             </Box>

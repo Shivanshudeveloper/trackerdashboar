@@ -71,9 +71,9 @@ const UserSignIn = () => {
       .post(`${API_SERVICE}/api/teamUser/login`, body, config)
       .then((res) => {
         console.log(res.data);
-        window.sessionStorage.setItem("userData", JSON.stringify(res.data));
+        window.localStorage.setItem("userData", JSON.stringify(res.data));
         setOpen(false);
-        router.replace("/");
+        router.replace("/dashboard");
       })
       .catch((error) => {
         setOpen(false);

@@ -46,17 +46,16 @@ const Organization = () => {
   const { user } = useContext(AuthContext);
 
   useEffect(async () => {
-    if (user !== null) {
+    if (user) {
       await axios
         .get(`${API_SERVICE}/api/organization/${user.organization}`)
         .then((res) => {
-          console.log(res.data);
-          if (res.data !== null) {
+          if (res.data) {
             setDetails(res.data);
           }
           setLoading(false);
         })
-        .catch((error) => console.log(error));
+        .catch((error) => console.error(error));
     }
   }, [user]);
 
@@ -107,8 +106,6 @@ const Organization = () => {
       id: details.id,
     };
 
-    console.log(body);
-
     await axios
       .put(`${API_SERVICE}/api/organization/update`, body, config)
       .then((res) => {
@@ -117,14 +114,14 @@ const Organization = () => {
         setMessage(res.data);
         setSnackOpen(true);
       })
-      .then(async () => {
-        await axios
-          .put(`${API_SERVICE}/api/admin/update`, { organization: details.name }, config)
-          .then(() => {
-            console.log("Admin Updated Successfully");
-          })
-          .catch((error) => console.log(error));
-      })
+      // .then(async () => {
+      //   await axios
+      //     .put(`${API_SERVICE}/api/admin/update`, { organization: details.name }, config)
+      //     .then(() => {
+      //       console.log("Admin Updated Successfully");
+      //     })
+      //     .catch((error) => console.log(error));
+      // })
       .catch((error) => {
         setVariant("error");
         setMessage(error.message);

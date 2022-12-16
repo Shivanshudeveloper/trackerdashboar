@@ -21,7 +21,7 @@ const TeamAndUserProvider = ({ children }) => {
   useEffect(() => {
     if (user !== null) {
       getTeams(user.organization);
-      getUsersByGroup(user.organization);
+      //getUsersByGroup(user.organization);
     }
   }, [user]);
 
@@ -38,9 +38,8 @@ const TeamAndUserProvider = ({ children }) => {
     try {
       const { data } = await axios.get(`${API_SERVICE}/api/teamUsersByGroup/${organization}`);
       setUsers(data);
-      console.log(data);
     } catch (error) {
-      console.log(error.response.data.message);
+      console.log(error?.response?.data.message);
     }
   };
 

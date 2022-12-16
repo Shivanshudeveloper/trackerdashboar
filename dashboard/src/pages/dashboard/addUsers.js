@@ -311,7 +311,7 @@ const AddUsers = () => {
           <Button
             variant="contained"
             sx={{ py: 1.4, mr: 2, backgroundColor: "gray" }}
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/dashboard")}
           >
             Cancel
           </Button>

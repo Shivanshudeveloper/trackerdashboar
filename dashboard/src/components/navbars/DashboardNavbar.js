@@ -13,7 +13,7 @@ const DashboardNavbar = () => {
   const { user } = useContext(AuthContext);
 
   useEffect(async () => {
-    if (user !== null) {
+    if (user) {
       await axios
         .get(`${API_SERVICE}/api/teamUser/count/${user.organization}`)
         .then((res) => {
@@ -42,7 +42,7 @@ const DashboardNavbar = () => {
     >
       <Stack direction="row" justifyContent="center">
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/">{`All Users (${allUsers})`}</Link>
+          <Link href="/dashboard">{`All Users (${allUsers})`}</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
           <Link href="/dashboard/activetoday">{`Active Today (${active})`}</Link>
@@ -51,10 +51,10 @@ const DashboardNavbar = () => {
           <Link href="/dashboard/inactivetoday">{`Inactive Today (${inactive})`}</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/">No Show</Link>
+          <Link href="/dashboard">No Show</Link>
         </Typography>
         <Typography sx={{ color: "black", mx: 1.5 }} component="h1" variant="h6">
-          <Link href="/">App not installed</Link>
+          <Link href="/dashboard">App not installed</Link>
         </Typography>
       </Stack>
     </Toolbar>

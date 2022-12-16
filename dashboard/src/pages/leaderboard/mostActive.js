@@ -78,7 +78,7 @@ const MostActive = () => {
             ))}
           </Select>
         </FormControl>
-        <FormControl variant="filled" sx={{ minWidth: 250, mr: 3, alignSelf: "flex-end" }}>
+        {/* <FormControl variant="filled" sx={{ minWidth: 250, mr: 3, alignSelf: "flex-end" }}>
           <InputLabel id="demo-simple-select-filled-label">Month</InputLabel>
           <Select labelId="demo-simple-select-filled-label" id="demo-simple-select-filled">
             <MenuItem value="">
@@ -88,7 +88,7 @@ const MostActive = () => {
             <MenuItem value={20}>Twenty</MenuItem>
             <MenuItem value={30}>Thirty</MenuItem>
           </Select>
-        </FormControl>
+        </FormControl> */}
       </Box>
 
       {loading && (
