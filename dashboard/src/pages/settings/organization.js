@@ -86,7 +86,7 @@ const Organization = () => {
         ...details,
         trackBetween: {
           startDate: data[0],
-          endData: data[1],
+          endDate: data[1],
         },
       };
       setDetails(newData);
@@ -299,12 +299,23 @@ const Organization = () => {
                   </Grid>
                   <Grid item md={9}>
                     <div className="field">
+                      {
+                        details.trackOn ? 
+                        <DatePicker
+                        value={new Date(details.trackOn)}
+                        format="HH:mm"
+                        ranges={[]}
+                        style={{ width: 260 }}
+                        onChange={selectTime}
+                      /> : 
                       <DatePicker
                         format="HH:mm"
                         ranges={[]}
                         style={{ width: 260 }}
                         onChange={selectTime}
                       />
+                      }
+                      
                     </div>
                   </Grid>
                 </Grid>
@@ -318,7 +329,11 @@ const Organization = () => {
                     </Typography>
                   </Grid>
                   <Grid item md={9} sx={{ my: 2 }}>
-                    <DateRangePicker onChange={setRange} style={{ width: 260 }} />
+                    {
+                      details.trackBetween.startDate && details.trackBetween.endDate ? 
+                      <DateRangePicker value={[new Date(details.trackBetween.startDate), new Date(details.trackBetween.endDate)]} onChange={setRange} style={{ width: 260 }} /> : 
+                      <DateRangePicker onChange={setRange} style={{ width: 260 }} />
+                    }
                   </Grid>
                 </Grid>
               </Box>

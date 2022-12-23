@@ -100,7 +100,6 @@ const EditUser = () => {
   };
 
   const handleChange = (event) => {
-    console.log(event.target.name, event.target.value);
     const data = {
       ...userData,
       [event.target.name]: event.target.value,
