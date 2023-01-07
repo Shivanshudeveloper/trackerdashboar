@@ -23,7 +23,7 @@ const SignIn = () => {
   const [message, setMessage] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const [disabled, setDisabled] = useState(false)
+  const [disabled, setDisabled] = useState(false);
 
   const { signIn } = useContext(AuthContext);
   const router = useRouter();
@@ -36,7 +36,7 @@ const SignIn = () => {
     setSnackOpen(false);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     // eslint-disable-next-line no-console
@@ -48,14 +48,14 @@ const SignIn = () => {
       return;
     }
 
-    setDisabled(true)
-    const res = signIn({
+    setDisabled(true);
+    const res = await signIn({
       email: data.get("email"),
       password: data.get("password"),
     });
 
     if (res) {
-      router.replace('/dashboard')
+      router.replace("/dashboard");
     }
   };
 

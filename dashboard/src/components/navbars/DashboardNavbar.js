@@ -18,6 +18,7 @@ const DashboardNavbar = () => {
         .get(`${API_SERVICE}/api/teamUser/count/${user.organization}`)
         .then((res) => {
           const response = res.data;
+          console.log(response);
           setAllUser(response.allUsers);
           setActive(response.active);
           setInactive(response.inactive);

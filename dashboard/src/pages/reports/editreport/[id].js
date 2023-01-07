@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import {
   Box,
@@ -23,6 +23,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import axios from "axios";
 import { API_SERVICE } from "src/config/uri";
 import SnackMessage from "src/components/SnackMessage";
+import { AuthContext } from "src/contextx/authContext";
 
 const shareReportArr = ["One Time", "Daily", "Weekly", "Monthly", "Annually", "Fortnightly"];
 const ITEM_HEIGHT = 48;
@@ -69,10 +70,13 @@ const CreateReport = () => {
   const { id } = router.query;
 
   // fetching login user data
+  const { user } = useContext(AuthContext);
+
   useEffect(() => {
-    const data = JSON.parse(window.localStorage.getItem("userData"));
-    setUserData(data);
-  }, []);
+    if (user !== null) {
+      setUserData(user);
+    }
+  }, [user]);
 
   // fetching ans setting teams
   useEffect(async () => {
@@ -140,10 +144,6 @@ const CreateReport = () => {
         }
       });
     });
-
-    console.log(value);
-    console.log(usersArr);
-    console.log(names);
 
     setUsers(usersArr);
     setUserNames(names);
@@ -218,6 +218,7 @@ const CreateReport = () => {
       });
 
       const insertData = {
+        id: id,
         reportTitle: reportTitle,
         reportCategory: reportCategoryArr,
         reportPeriod: reportPeriod,
@@ -241,8 +242,9 @@ const CreateReport = () => {
       };
 
       setLoading(true);
-      const { data } = await axios.post(`${API_SERVICE}/api/report/create`, body, config);
-      setMessage(data.message);
+      const { data } = await axios.post(`${API_SERVICE}/api/report/update`, body, config);
+      console.log(data);
+      setMessage(data);
       setVariant("success");
       setLoading(false);
       setSnackOpen(true);
@@ -271,7 +273,9 @@ const CreateReport = () => {
             <InputLabel id="select_teams">Select Teams</InputLabel>
             <Select value={teamName} onChange={(e) => selectTeam(e)} label="Select Teams">
               {teamList.map((x) => (
-                <MenuItem value={x.team_name}>{x.team_name}</MenuItem>
+                <MenuItem key={x.team_name} value={x.team_name}>
+                  {x.team_name}
+                </MenuItem>
               ))}
             </Select>
           </FormControl>

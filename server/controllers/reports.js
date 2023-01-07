@@ -1,58 +1,88 @@
-const db = require('../models/index')
-const asyncHandler = require('express-async-handler')
-const { sequelize } = require('../models/index')
-const { Op } = require('sequelize')
-const { v4: uuidv4 } = require('uuid')
+const db = require("../models/index");
+const asyncHandler = require("express-async-handler");
+const { sequelize } = require("../models/index");
+const { Op } = require("sequelize");
+const { v4: uuidv4 } = require("uuid");
 
 const createReport = asyncHandler(async (req, res, next) => {
   try {
-    const { data } = req.body
+    const { data } = req.body;
     const obj = {
       id: uuidv4(),
       ...data,
       time: new Date().getTime(),
-    }
+    };
 
-    await db.report.create(obj)
+    await db.report.create(obj);
 
-    res.status(200).send({ message: 'Report saved successfully' })
+    res.status(200).send({ message: "Report saved successfully" });
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
+
+const updateReport = asyncHandler(async (req, res, next) => {
+  const { data } = req.body;
+  await db.report
+    .findByPk(data.id)
+    .then(async (report) => {
+      const newData = {
+        reportTitle: data.reportTitle || report.reportTitle,
+        reportCategory: data.reportCategory || report.reportCategory,
+        reportPeriod: data.reportPeriod || report.reportPeriod,
+        team: data.team || report.team,
+        users: data.users || report.users,
+        sharePeriod: data.sharePeriod || report.sharePeriod,
+        shareTime: data.shareTime || report.shareTime,
+        shareWith: data.shareWith || report.shareWith,
+        createdBy: data.createdBy || report.createdBy,
+        organization: data.organization || report.organization,
+        type: data.type || report.type,
+      };
+
+      await db.report
+        .update(newData, { where: { id: data.id } })
+        .then(() => {
+          res.statusCode = 200;
+          res.json("report updated successfully");
+        })
+        .catch((error) => next(error));
+    })
+    .catch((error) => next(error));
+});
 
 const getReportsOfTypeofOrganization = asyncHandler(async (req, res, next) => {
-  const { type, organization } = req.params
+  const { type, organization } = req.params;
   await db.report
     .findAll({ where: { type, organization } })
     .then((reports) => {
-      res.statusCode = 200
-      res.json(reports)
+      res.statusCode = 200;
+      res.json(reports);
     })
-    .catch((error) => next(error))
-})
+    .catch((error) => next(error));
+});
 
 const getReportById = asyncHandler(async (req, res, next) => {
-  const { id } = req.params
+  const { id } = req.params;
   await db.report
     .findByPk(id)
     .then((report) => {
-      res.statusCode = 200
-      res.json(report)
+      res.statusCode = 200;
+      res.json(report);
     })
-    .catch((error) => next(error))
-})
+    .catch((error) => next(error));
+});
 
 const getProductivityReport = asyncHandler(async (req, res, next) => {
   try {
-    const { data } = req.body
-    const d = []
+    const { data } = req.body;
+    const d = [];
 
     for (let i of data.users) {
       const resultData = await db.tracker_data.findAll({
         attributes: [
-          'type',
-          [sequelize.fn('sum', sequelize.col('duration')), 'value'],
+          "type",
+          [sequelize.fn("sum", sequelize.col("duration")), "value"],
         ],
         where: {
           organization: data.organization,
@@ -64,61 +94,61 @@ const getProductivityReport = asyncHandler(async (req, res, next) => {
             [Op.between]: [data.startDate, data.endDate],
           },
         },
-        group: ['type'],
-      })
+        group: ["type"],
+      });
 
-      let temp
-      const arr = []
+      let temp;
+      const arr = [];
 
       resultData.map((item) => {
-        if (item.type === 'Unproductive') {
+        if (item.type === "Unproductive") {
           temp = {
             value: parseInt(item.dataValues.value),
             description: item.dataValues.type,
-            color: 'red',
-          }
-          arr.push(temp)
+            color: "red",
+          };
+          arr.push(temp);
         } else {
           temp = {
             value: parseInt(item.dataValues.value),
             description: item.dataValues.type,
-            color: 'green',
-          }
-          arr.push(temp)
+            color: "green",
+          };
+          arr.push(temp);
         }
-      })
+      });
 
       const result = {
         fullName: i.fullName,
         profilePicture: i.profilePicture,
         data: arr,
-      }
+      };
 
-      d.push(result)
+      d.push(result);
     }
 
-    res.statusCode = 200
-    res.json(d)
+    res.statusCode = 200;
+    res.json(d);
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 const getAppUsageReport = asyncHandler(async (req, res, next) => {
   try {
-    const { data } = req.body
+    const { data } = req.body;
 
-    const id = []
+    const id = [];
 
     data.users.forEach((x) => {
-      id.push(x.id)
-    })
+      id.push(x.id);
+    });
 
     const resultData = await db.tracker_data.findAll({
       attributes: [
-        'owner',
-        [sequelize.literal(`time_bucket('1 day', time)`), 'bucket'],
-        [sequelize.fn('sum', sequelize.col('duration')), 'value'],
+        "owner",
+        [sequelize.literal(`time_bucket('1 day', time)`), "bucket"],
+        [sequelize.fn("sum", sequelize.col("duration")), "value"],
       ],
       where: {
         organization: data.organization,
@@ -128,42 +158,42 @@ const getAppUsageReport = asyncHandler(async (req, res, next) => {
           [Op.between]: [data.startDate, data.endDate],
         },
       },
-      group: ['owner', 'bucket'],
-    })
+      group: ["owner", "bucket"],
+    });
 
     const numberOfDay = Math.ceil(
       Math.abs(new Date(data.endDate) - new Date(data.startDate)) /
         (1000 * 60 * 60 * 24)
-    )
+    );
 
     const result = {
       days: numberOfDay,
       data: resultData,
-    }
+    };
 
-    res.statusCode = 200
-    res.json(result)
+    res.statusCode = 200;
+    res.json(result);
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 const getTimesheetReport = asyncHandler(async (req, res, next) => {
   try {
-    const { data } = req.body
+    const { data } = req.body;
 
-    const id = []
+    const id = [];
 
     data.users.forEach((x) => {
-      id.push(x.id)
-    })
+      id.push(x.id);
+    });
 
     const timesheetData = await db.tracker_data.findAll({
       attributes: [
-        'userid',
-        [sequelize.literal(`time_bucket('1 day', time)`), 'bucket'],
-        [sequelize.fn('sum', sequelize.col('duration')), 'sum'],
-        [sequelize.fn('count', sequelize.col('duration')), 'count'],
+        "userid",
+        [sequelize.literal(`time_bucket('1 day', time)`), "bucket"],
+        [sequelize.fn("sum", sequelize.col("duration")), "sum"],
+        [sequelize.fn("count", sequelize.col("duration")), "count"],
       ],
       where: {
         organization: data.organization,
@@ -173,44 +203,44 @@ const getTimesheetReport = asyncHandler(async (req, res, next) => {
           [Op.between]: [data.startDate, data.endDate],
         },
       },
-      group: ['userid', 'bucket'],
-    })
+      group: ["userid", "bucket"],
+    });
 
-    const listDate = []
-    const startDate = data.startDate
-    const endDate = data.endDate
-    const dateMove = new Date(endDate)
-    let strDate = endDate
+    const listDate = [];
+    const startDate = data.startDate;
+    const endDate = data.endDate;
+    const dateMove = new Date(endDate);
+    let strDate = endDate;
 
     while (strDate > startDate) {
-      strDate = dateMove.toISOString().slice(0, 10)
-      listDate.push(new Date(strDate))
-      dateMove.setDate(dateMove.getDate() - 1)
+      strDate = dateMove.toISOString().slice(0, 10);
+      listDate.push(new Date(strDate));
+      dateMove.setDate(dateMove.getDate() - 1);
     }
 
     const finalData = {
       dates: listDate,
       timesheetData,
-    }
+    };
 
-    res.status(200).send(finalData)
+    res.status(200).send(finalData);
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 const getActivityReport = asyncHandler(async (req, res, next) => {
   try {
-    const { data } = req.body
+    const { data } = req.body;
 
-    const activity = {}
+    const activity = {};
 
     for (let i of data.users) {
       const activityData = await db.tracker_data.findAll({
         attributes: [
-          'userid',
-          'type',
-          [sequelize.fn('sum', sequelize.col('duration')), 'sum'],
+          "userid",
+          "type",
+          [sequelize.fn("sum", sequelize.col("duration")), "sum"],
         ],
         where: {
           organization: data.organization,
@@ -220,11 +250,11 @@ const getActivityReport = asyncHandler(async (req, res, next) => {
             [Op.between]: [data.startDate, data.endDate],
           },
         },
-        group: ['userid', 'type'],
-      })
+        group: ["userid", "type"],
+      });
 
-      let temp
-      const arr = []
+      let temp;
+      const arr = [];
 
       activityData.map((item) => {
         temp = {
@@ -232,62 +262,63 @@ const getActivityReport = asyncHandler(async (req, res, next) => {
           fullName: i.fullName,
           sum: parseInt(item.dataValues.sum),
           description: item.dataValues.type,
-        }
-        arr.push(temp)
-      })
+        };
+        arr.push(temp);
+      });
 
-      activity[i.id] = arr
+      activity[i.id] = arr;
     }
 
-    res.statusCode = 200
-    res.json(activity)
+    res.statusCode = 200;
+    res.json(activity);
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 const getActivityScreenshots = asyncHandler(async (req, res, next) => {
   try {
-    const { data } = req.body
+    const { data } = req.body;
 
-    const ss = {}
+    const ss = {};
 
     for (let i of data.users) {
       const screenshots = await db.tracker_data.findAll({
-        attributes: ['imgName', 'owner', 'duration', 'time'],
+        attributes: ["imgName", "owner", "duration", "time"],
         where: {
           userid: i.id,
         },
-      })
+      });
 
-      const result = []
+      const result = [];
 
       screenshots.map((x) => {
         if (x.dataValues.imgName.length !== 0) {
-          result.push(x.dataValues)
+          result.push(x.dataValues);
         }
-      })
+      });
 
-      ss[i.id] = result
+      ss[i.id] = result;
     }
 
-    res.statusCode = 200
-    res.json(ss)
+    res.statusCode = 200;
+    res.json(ss);
   } catch (error) {
-    next(error)
+    next(error);
   }
-})
+});
 
 const deleteReport = asyncHandler(async (req, res, next) => {
-  const { id } = req.params
+  const { id } = req.params;
   await db.report
     .destroy({ where: { id } })
-    .then(() => res.status(200).send('Successfully Deleted'))
-    .catch((error) => next(error))
-})
+    .then(() => res.status(200).send("Successfully Deleted"))
+    .catch((error) => next(error));
+});
 
 module.exports = {
   createReport,
+  updateReport,
   getReportsOfTypeofOrganization,
   deleteReport,
   getReportById,
@@ -296,4 +327,4 @@ module.exports = {
   getActivityReport,
   getActivityScreenshots,
   getTimesheetReport,
-}
+};

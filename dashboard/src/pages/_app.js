@@ -11,7 +11,7 @@ import "../styles/globals.css";
 import "rsuite/dist/rsuite.min.css";
 import AuthProvider from "src/contextx/authContext";
 import TeamAndUserProvider from "src/contextx/teamAndUserContext";
-import { isJwtExpired } from 'jwt-check-expiration'
+import { isJwtExpired } from "jwt-check-expiration";
 import { useRouter } from "next/router";
 
 const clientSideEmotionCache = createEmotionCache();
@@ -20,17 +20,16 @@ const App = (props) => {
   const { Component, emotionCache = clientSideEmotionCache, pageProps } = props;
 
   const getLayout = Component.getLayout ?? ((page) => page);
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token') ? localStorage.getItem('token') : null
-    console.log('authenticated', !isJwtExpired(token))
+    const token = localStorage.getItem("token") ? localStorage.getItem("token") : null;
     if (token && !isJwtExpired(token)) {
-      router.replace('/dashboard')
+      router.replace("/dashboard");
     } else {
-      router.replace('/signin')
+      router.replace("/signin");
     }
-  }, [])
+  }, []);
 
   return (
     <CacheProvider value={emotionCache}>

@@ -48,7 +48,7 @@ const Dashboard = () => {
     }
   }, [users]);
 
-  const applyFilter = async (e) => {
+  async function applyFilter(e) {
     setFilter(e.target.value);
     setLoading(true);
 
@@ -60,14 +60,14 @@ const Dashboard = () => {
       return;
     }
 
-    const filterTeam = users[filterName]
+    const filterTeam = users[filterName];
     if (filterTeam) {
-      let obj = {}
-      obj[filterName] = filterTeam
-      setUserList(obj)
+      let obj = {};
+      obj[filterName] = filterTeam;
+      setUserList(obj);
       setLoading(false);
     }
-  };
+  }
 
   if (users === null || Object.entries(users) == 0) {
     return (
@@ -117,7 +117,7 @@ const Dashboard = () => {
           <Box sx={{ display: "flex", flexDirection: "column" }}>
             <FormControl variant="outlined" sx={{ minWidth: 250, mr: 3, alignSelf: "flex-end" }}>
               <InputLabel>Filter</InputLabel>
-              <Select value={filter} onChange={(e) => applyFilter(e)} label="Filter">
+              <Select value={filter} onChange={applyFilter} label="Filter">
                 <MenuItem value="All Teams">All Teams</MenuItem>
                 {teamList.map((x) => (
                   <MenuItem key={x.id} value={x.team_name}>
