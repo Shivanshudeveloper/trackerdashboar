@@ -46,12 +46,12 @@ const organisationName = () => {
   }, [org]);
 
   const updateOrganizationName = async () => {
-    if (organization === "") {
-      setVariant("error");
-      setMessage("Organization name cannot be empty");
-      setSnackOpen(true);
-      return;
-    }
+    // if (organization === "") {
+    //   setVariant("error");
+    //   setMessage("Organization name cannot be empty");
+    //   setSnackOpen(true);
+    //   return;
+    // }
 
     updateOrgName(organization);
   };
@@ -106,7 +106,7 @@ const organisationName = () => {
               <Button
                 variant="contained"
                 sx={{ mt: 2, mb: 2, py: 1.4, px: 4.2, fontSize: 16 }}
-                onClick={() => router.push("/setUpTeams")}
+                onClick={() => updateOrganizationName()}
               >
                 SKip
               </Button>

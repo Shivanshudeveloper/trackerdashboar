@@ -24,7 +24,7 @@ import SnackMessage from "src/components/SnackMessage";
 const VerifyAccess = () => {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
-  const [userData, setUserData] = useState("");
+  const [user, setuser] = useState("");
   const [variant, setVariant] = useState("success");
   const [message, setMessage] = useState("");
   const [snackOpen, setSnackOpen] = useState(false);
@@ -32,8 +32,8 @@ const VerifyAccess = () => {
   const [dialog, setDialog] = useState(false);
 
   useEffect(() => {
-    const data = JSON.parse(window.localStorage.getItem("userData"));
-    setUserData(data);
+    const data = JSON.parse(window.localStorage.getItem("user"));
+    setuser(data);
   }, []);
 
   const handleClose = () => {
@@ -75,7 +75,7 @@ const VerifyAccess = () => {
       };
 
       const body = {
-        id: userData.id,
+        id: user.id,
         password,
       };
 
@@ -104,9 +104,9 @@ const VerifyAccess = () => {
           <Typography component="h1" variant="h4">
             Verify admin access
           </Typography>
-          {userData !== null && (
+          {user !== null && (
             <Typography component="h2" variant="h5" sx={{ mt: 5, fontSize: 28 }}>
-              We have sent a one time verification code to {userData.email}
+              We have sent a one time verification code to {user.email}
             </Typography>
           )}
         </Box>

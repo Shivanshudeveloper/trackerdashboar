@@ -3,6 +3,9 @@ const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const { sequelize } = require("../models/index");
 const { Op } = require("sequelize");
+const jwt = require("jsonwebtoken");
+
+require("dotenv").config();
 
 const addUsers = asyncHandler(async (req, res, next) => {
   const { teamUsers } = req.body;
@@ -64,7 +67,10 @@ const teamAdminLogin = asyncHandler(async (req, res, next) => {
         .then((macth) => {
           if (macth) {
             res.statusCode = 200;
-            res.json(user);
+            const token = jwt.sign({ id: user.id }, process.env.ACCESS_SECRET, {
+              expiresIn: 3600,
+            });
+            res.json({ user, token: token });
           } else {
             throw new Error("Password do not match");
           }

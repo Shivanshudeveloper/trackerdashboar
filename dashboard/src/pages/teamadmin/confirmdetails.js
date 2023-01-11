@@ -15,7 +15,7 @@ const ConfirmDetails = () => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const data = JSON.parse(window.localStorage.getItem("userData"));
+    const data = JSON.parse(window.localStorage.getItem("user"));
     setUserData(data);
   }, []);
 
@@ -55,7 +55,7 @@ const ConfirmDetails = () => {
     await axios
       .post(`${API_SERVICE}/api/teamUser/update`, body, config)
       .then(() => {
-        router.push("/dashboard");
+        router.push("/teamadmin/signin");
         setOpen(false);
       })
       .catch((error) => {
@@ -160,7 +160,7 @@ const ConfirmDetails = () => {
                   />
                 </Grid>
               </Grid>
-              <Grid container sx={{ my: 2, display: "flex", alignItems: "center" }}>
+              {/* <Grid container sx={{ my: 2, display: "flex", alignItems: "center" }}>
                 <Grid item md={3}>
                   Tracking Mode
                 </Grid>
@@ -175,8 +175,8 @@ const ConfirmDetails = () => {
                     value={userData.trackingMode}
                   />
                 </Grid>
-              </Grid>
-              <Grid container sx={{ my: 2, display: "flex", alignItems: "center" }}>
+              </Grid> */}
+              {/* <Grid container sx={{ my: 2, display: "flex", alignItems: "center" }}>
                 <Grid item md={3}>
                   Track On
                 </Grid>
@@ -191,8 +191,8 @@ const ConfirmDetails = () => {
                     value={userData.trackOn}
                   />
                 </Grid>
-              </Grid>
-              <Grid container sx={{ my: 2, display: "flex", alignItems: "center" }}>
+              </Grid> */}
+              {/* <Grid container sx={{ my: 2, display: "flex", alignItems: "center" }}>
                 <Grid item md={3}>
                   Track Between
                 </Grid>
@@ -207,7 +207,7 @@ const ConfirmDetails = () => {
                     disabled
                   />
                 </Grid>
-              </Grid>
+              </Grid> */}
 
               <Stack direction="row" justifyContent="flex-end">
                 <Button

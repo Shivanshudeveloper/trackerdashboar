@@ -56,7 +56,7 @@ const Welcome = () => {
       .post(`${API_SERVICE}/api/teamUser/validate`, body, config)
       .then((res) => {
         console.log(res.data);
-        window.localStorage.setItem("userData", JSON.stringify(res.data));
+        window.localStorage.setItem("user", JSON.stringify(res.data));
       })
       .then(() => {
         setOpen(false);

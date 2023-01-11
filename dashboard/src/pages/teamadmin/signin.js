@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Button from "@mui/material/Button";
@@ -14,6 +14,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { API_SERVICE } from "../../config/uri";
 import SnackMessage from "src/components/SnackMessage";
 import axios from "axios";
+import { AuthContext } from "src/contextx/authContext";
 
 const theme = createTheme();
 
@@ -26,6 +27,8 @@ const UserSignIn = () => {
   const [open, setOpen] = useState(false);
 
   const router = useRouter();
+
+  const { setUser } = useContext(AuthContext);
 
   const handleClose = () => {
     setOpen(false);
@@ -71,7 +74,9 @@ const UserSignIn = () => {
       .post(`${API_SERVICE}/api/teamUser/login`, body, config)
       .then((res) => {
         console.log(res.data);
-        window.localStorage.setItem("userData", JSON.stringify(res.data));
+        window.localStorage.setItem("token", res.data.token);
+        window.localStorage.setItem("user", JSON.stringify(res.data.user));
+        setUser(res.data.user);
         setOpen(false);
         router.replace("/dashboard");
       })

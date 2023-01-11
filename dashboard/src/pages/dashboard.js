@@ -100,6 +100,8 @@ const Dashboard = () => {
     );
   }
 
+  console.log(userList);
+
   return (
     <React.Fragment>
       <Head>

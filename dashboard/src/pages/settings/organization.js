@@ -45,6 +45,8 @@ const Organization = () => {
 
   const { user } = useContext(AuthContext);
 
+  console.log(user);
+
   useEffect(async () => {
     if (user) {
       await axios
@@ -183,6 +185,8 @@ const Organization = () => {
     }
   };
 
+  console.log(details);
+
   return (
     <Box sx={{ py: 3 }}>
       <Stack direction="row" justifyContent="flex-end">
@@ -220,7 +224,7 @@ const Organization = () => {
             <Grid item md={10} sx={{ my: 3 }}>
               <OutlinedInput
                 fullWidth
-                value={details.name}
+                value={details?.name}
                 name="name"
                 onChange={(e) => handleChange(e)}
               />
@@ -234,7 +238,7 @@ const Organization = () => {
             <Grid item md={10} sx={{ my: 3 }}>
               <Stack direction="row" alignItems="center">
                 {url === null ? (
-                  <Avatar src={details.logo} sx={{ width: 120, height: 120, mx: 2 }} />
+                  <Avatar src={details?.logo} sx={{ width: 120, height: 120, mx: 2 }} />
                 ) : (
                   <Avatar src={url} sx={{ width: 120, height: 120, mx: 2 }} />
                 )}
@@ -254,7 +258,7 @@ const Organization = () => {
             <Grid item md={10} sx={{ my: 3 }}>
               <OutlinedInput
                 fullWidth
-                value={details.customDomain}
+                value={details?.customDomain}
                 name="customDomain"
                 onChange={(e) => handleChange(e)}
               />
@@ -270,7 +274,7 @@ const Organization = () => {
                 <InputLabel>Timezone</InputLabel>
                 <Select
                   label="Timezone"
-                  value={details.timezone}
+                  value={details?.timezone}
                   name="timezone"
                   onChange={(e) => handleChange(e)}
                 >
@@ -299,23 +303,22 @@ const Organization = () => {
                   </Grid>
                   <Grid item md={9}>
                     <div className="field">
-                      {
-                        details.trackOn ? 
+                      {details?.trackOn ? (
                         <DatePicker
-                        value={new Date(details.trackOn)}
-                        format="HH:mm"
-                        ranges={[]}
-                        style={{ width: 260 }}
-                        onChange={selectTime}
-                      /> : 
-                      <DatePicker
-                        format="HH:mm"
-                        ranges={[]}
-                        style={{ width: 260 }}
-                        onChange={selectTime}
-                      />
-                      }
-                      
+                          value={new Date(details?.trackOn)}
+                          format="HH:mm"
+                          ranges={[]}
+                          style={{ width: 260 }}
+                          onChange={selectTime}
+                        />
+                      ) : (
+                        <DatePicker
+                          format="HH:mm"
+                          ranges={[]}
+                          style={{ width: 260 }}
+                          onChange={selectTime}
+                        />
+                      )}
                     </div>
                   </Grid>
                 </Grid>
@@ -329,11 +332,18 @@ const Organization = () => {
                     </Typography>
                   </Grid>
                   <Grid item md={9} sx={{ my: 2 }}>
-                    {
-                      details.trackBetween.startDate && details.trackBetween.endDate ? 
-                      <DateRangePicker value={[new Date(details.trackBetween.startDate), new Date(details.trackBetween.endDate)]} onChange={setRange} style={{ width: 260 }} /> : 
+                    {details?.trackBetween?.startDate && details?.trackBetween?.endDate ? (
+                      <DateRangePicker
+                        value={[
+                          new Date(details.trackBetween.startDate),
+                          new Date(details.trackBetween.endDate),
+                        ]}
+                        onChange={setRange}
+                        style={{ width: 260 }}
+                      />
+                    ) : (
                       <DateRangePicker onChange={setRange} style={{ width: 260 }} />
-                    }
+                    )}
                   </Grid>
                 </Grid>
               </Box>

@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import { API_SERVICE, Application_Id } from "src/config/uri";
-import { isJwtExpired } from 'jwt-check-expiration';
+import { isJwtExpired } from "jwt-check-expiration";
 
 export const AuthContext = createContext();
 
@@ -22,8 +22,8 @@ const AuthProvider = ({ children }) => {
       : null;
 
     const authToken = window.localStorage.getItem("token")
-    ? window.localStorage.getItem("token")
-    : null;
+      ? window.localStorage.getItem("token")
+      : null;
 
     setOrg(organization);
     setUser(userData);
@@ -37,12 +37,12 @@ const AuthProvider = ({ children }) => {
   };
 
   const isAuthenticated = () => {
-    console.log(isJwtExpired(token))
+    console.log(isJwtExpired(token));
     if (token) {
-      return !isJwtExpired(token)
+      return !isJwtExpired(token);
     }
     return false;
-  }
+  };
 
   const signIn = async (obj) => {
     try {
@@ -50,10 +50,10 @@ const AuthProvider = ({ children }) => {
       window.localStorage.setItem("token", data.token);
       window.localStorage.setItem("user", JSON.stringify({ ...data.user, role: "Admin" }));
       setUser(data.user);
-      return true
+      return true;
     } catch (error) {
       console.log(error.message);
-      return false
+      return false;
     }
   };
 
@@ -74,9 +74,9 @@ const AuthProvider = ({ children }) => {
 
       const res = await axios.post(`${API_SERVICE}/api/register`, body, config);
 
-      const token = res.data?.token
+      const token = res.data?.token;
       if (token) {
-        localStorage.setItem('token', token)
+        localStorage.setItem("token", token);
       }
 
       const userData = {
@@ -96,7 +96,7 @@ const AuthProvider = ({ children }) => {
     try {
       const res = await axios.post(
         `${API_SERVICE}/api/organization/create`,
-        { data: { name: org } },
+        { data: { name: org === "" ? "Organization" : org } },
         config
       );
 
@@ -126,7 +126,19 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ signIn, user, signUp, signedUpUser, updateOrgName, org, addTeams, teams, isAuthenticated, token }}
+      value={{
+        signIn,
+        user,
+        setUser,
+        signUp,
+        signedUpUser,
+        updateOrgName,
+        org,
+        addTeams,
+        teams,
+        isAuthenticated,
+        token,
+      }}
     >
       {children}
     </AuthContext.Provider>
